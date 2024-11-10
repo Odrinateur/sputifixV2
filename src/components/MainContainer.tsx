@@ -2,21 +2,21 @@ import React from 'react';
 
 interface MainContainerProps {
     children: React.ReactNode;
-    isJustifyCenter?: boolean;
+    justifyCenter?: boolean;
     className?: string;
 }
 
-function MainContainer({ children, isJustifyCenter, className }: MainContainerProps) {
+function MainContainer({ children, justifyCenter, className }: MainContainerProps) {
     return (
-        <main className={`flex flex-col p-2 items-center ${isJustifyCenter ? 'justify-center' : 'justify-start'} h-full ${className}`}>
+        <main className={`flex flex-col p-2 items-center ${justifyCenter ? 'justify-center' : 'justify-start'} h-full ${className}`}>
             {children}
         </main>
     );
 }
 
-function MainContainerWithNav({ children, isJustifyCenter, className }: MainContainerProps) {
+function MainContainerWithNav({ children, justifyCenter, className }: MainContainerProps) {
     return (
-        <MainContainer className={className} isJustifyCenter={isJustifyCenter}>
+        <MainContainer className={className} justifyCenter={justifyCenter}>
             <nav></nav>
             {children}
         </MainContainer>
