@@ -1,8 +1,12 @@
 import secureLocalStorage from "react-secure-storage";
 
 export default function Callback() {
-    secureLocalStorage.setItem('logged_in', 'true');
-    secureLocalStorage.setItem('code', new URLSearchParams(window.location.search).get('code') as string);
-
+    const code = new URLSearchParams(window.location.search).get('code');
+    if (code) {
+        secureLocalStorage.setItem('logged_in', 'true');
+        secureLocalStorage.setItem('code', code);
+    }
     window.location.href = '/';
+
+    return null;
 }
