@@ -1,12 +1,28 @@
-import secureLocalStorage from "react-secure-storage";
+import {useAuth} from "@/context/AuthContext.tsx";
+import {useEffect} from "react";
+import {MainContainer} from "@/components/MainContainer.tsx";
+import {LoadingSpinner} from "@/components/ui/spinner.tsx";
 
 export default function Callback() {
+    const {setCode} = useAuth();
     const code = new URLSearchParams(window.location.search).get('code');
-    if (code) {
-        secureLocalStorage.setItem('logged_in', 'true');
-        secureLocalStorage.setItem('code', code);
-    }
-    window.location.href = '/';
 
-    return null;
+    useEffect(() => {
+        const setCodeAsync = async (code: string) => {
+            console.log(code);
+            await setCode(code);
+            window.location.href = '/';
+        };
+        if (code) {
+            setCodeAsync(code as string).then();
+        }
+    }, [code, setCode]);
+
+    if (!code) {
+        window.location.href = '/';
+    }
+
+    return <MainContainer justifyCenter>
+        <LoadingSpinner size={100}/>
+    </MainContainer>
 }
