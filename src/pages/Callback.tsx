@@ -9,7 +9,6 @@ export default function Callback() {
 
     useEffect(() => {
         const setCodeAsync = async (code: string) => {
-            console.log(code);
             await setCode(code);
             window.location.href = '/';
         };
