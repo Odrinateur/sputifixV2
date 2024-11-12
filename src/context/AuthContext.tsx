@@ -1,12 +1,12 @@
 import {createContext, ReactNode, useContext} from 'react';
 import secureLocalStorage from "react-secure-storage";
 import {ApiResponse, ApiSettings} from "@/types/ApiSettings.ts";
-import {GetTokenByCode} from "@/api/auth.ts";
+import {GetTokenByCode, RefreshToken} from "@/api/auth.ts";
 
 type AuthContextType = {
     getCode: () => string | null;
     setCode: (code: string) => Promise<void>;
-    getAccessToken: () => string | null;
+    getAccessToken: () => Promise<string | null>;
     isTokenExpired: () => boolean;
     isAuthenticated: () => boolean;
 };
@@ -30,11 +30,16 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
         secureLocalStorage.setItem('logged_in', 'true');
     }
 
-    const getAccessToken = () => {
+    const getAccessToken = async () => {
         const apiSettingsJson = secureLocalStorage.getItem('api_settings');
         if (apiSettingsJson && typeof apiSettingsJson === 'string') {
             const apiSettings = JSON.parse(apiSettingsJson) as ApiSettings;
-            return apiSettings.accessToken;
+
+            const expiresAt = apiSettings.expiresAt;
+            if (expiresAt < Date.now())
+                return await RefreshToken(apiSettings.refreshToken);
+            else
+                return apiSettings.accessToken;
         }
         return null;
     }
@@ -43,7 +48,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
         const apiSettingsJson = secureLocalStorage.getItem('api_settings');
         if (apiSettingsJson && typeof apiSettingsJson === 'string') {
             const apiSettings = JSON.parse(apiSettingsJson) as ApiSettings;
-            return apiSettings.expiresIn < Date.now();
+            return apiSettings.expiresAt < Date.now();
         }
         return true;
     }
