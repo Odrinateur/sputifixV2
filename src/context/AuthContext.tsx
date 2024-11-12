@@ -21,13 +21,12 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     const setCode = async (code: string) => {
         if (!code) return;
         if (secureLocalStorage.getItem('code') && secureLocalStorage.getItem('api_settings')) return;
-        
+
         secureLocalStorage.setItem('code', code);
 
         const response = await GetTokenByCode(code);
         const apiSettings = new ApiSettings(response as ApiResponse);
         secureLocalStorage.setItem('api_settings', JSON.stringify(apiSettings));
-        secureLocalStorage.setItem('logged_in', 'true');
     }
 
     const getAccessToken = async () => {
@@ -36,9 +35,12 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
             const apiSettings = JSON.parse(apiSettingsJson) as ApiSettings;
 
             const expiresAt = apiSettings.expiresAt;
-            if (expiresAt < Date.now())
-                return await RefreshToken(apiSettings.refreshToken);
-            else
+            if (expiresAt < Date.now()) {
+                const response = await RefreshToken(apiSettings.refreshToken);
+                const newApiSettings = new ApiSettings(response as ApiResponse);
+                secureLocalStorage.setItem('api_settings', JSON.stringify(newApiSettings));
+                return newApiSettings.accessToken;
+            } else
                 return apiSettings.accessToken;
         }
         return null;
@@ -54,7 +56,7 @@ export const AuthProvider = ({children}: { children: ReactNode }) => {
     }
 
     const isAuthenticated = () => {
-        return secureLocalStorage.getItem('logged_in') === 'true';
+        return !isTokenExpired();
     }
 
     const auth = {
