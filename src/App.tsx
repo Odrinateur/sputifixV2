@@ -10,14 +10,16 @@ import {StorageProvider} from "@/context/StorageContext.tsx";
 
 
 export default function App() {
+
     return (
         <AuthProvider>
             <StorageProvider>
                 <ThemeProvider>
                     <Router>
                         <Routes>
-                            <Route path="/" element={secureLocalStorage.getItem('logged_in') === null ? <Login/> : <Home/>}/>
-                            <Route path="/callback" element={<Callback />} />
+                            <Route path="/"
+                                   element={secureLocalStorage.getItem('api_settings') === null ? <Login/> : <Home/>}/>
+                            <Route path="/callback" element={<Callback/>}/>
                             <Route path="/settings" element={<Settings/>}/>
                         </Routes>
                     </Router>
