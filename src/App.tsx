@@ -1,30 +1,27 @@
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
-import secureLocalStorage from "react-secure-storage";
 import {ThemeProvider} from '@/context/ThemeContext';
 import Home from '@/pages/Home.tsx';
-import Login from '@/pages/Login';
 import Settings from '@/pages/Settings';
-import Callback from "@/pages/Callback.tsx";
-import {AuthProvider} from "@/context/AuthContext.tsx";
-import {StorageProvider} from "@/context/StorageContext.tsx";
+import {SpotifySdkProvider} from "@/context/SpotifyContext.tsx";
+import {useSpotify} from "@/hooks/useSpotify.ts";
 
 
 export default function App() {
+    const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+    const redirectUrl = import.meta.env.VITE_REDIRECT_URL;
+    const scopes = import.meta.env.VITE_SPOTIFY_SCOPES.split(" ");
+    const sdk = useSpotify(clientId, redirectUrl, scopes);
 
-    return (
-        <AuthProvider>
-            <StorageProvider>
-                <ThemeProvider>
-                    <Router>
-                        <Routes>
-                            <Route path="/"
-                                   element={secureLocalStorage.getItem('api_settings') === null ? <Login/> : <Home/>}/>
-                            <Route path="/callback" element={<Callback/>}/>
-                            <Route path="/settings" element={<Settings/>}/>
-                        </Routes>
-                    </Router>
-                </ThemeProvider>
-            </StorageProvider>
-        </AuthProvider>
-    );
+    return sdk ? (
+        <SpotifySdkProvider sdk={sdk}>
+            <ThemeProvider>
+                <Router>
+                    <Routes>
+                        <Route path="/" element={<Home/>}/>
+                        <Route path="/settings" element={<Settings/>}/>
+                    </Routes>
+                </Router>
+            </ThemeProvider>
+        </SpotifySdkProvider>
+    ) : <></>;
 }

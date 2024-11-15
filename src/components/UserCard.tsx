@@ -1,7 +1,6 @@
-import {useAuth} from "@/context/AuthContext.tsx";
-import {useStorage} from "@/context/StorageContext.tsx";
+import {UserProfile} from "@spotify/web-api-ts-sdk";
 import {useEffect, useState} from "react";
-import User from "@/types/User.ts";
+import {useSpotifySdk} from "@/context/SpotifyContext.tsx";
 import {Card, CardContent} from "@/components/ui/card.tsx";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {H1, H4} from "@/components/ui/typography.tsx";
@@ -9,30 +8,18 @@ import {BadgeCheck, Link2} from "lucide-react";
 import {Link} from "react-router-dom";
 
 export default function UserCard() {
-    const {getAccessToken} = useAuth();
-    const {getUser} = useStorage();
-
-    const [token, setToken] = useState<string | null>(null);
-    const [user, setUser] = useState<User | null>(null);
+    const sdk = useSpotifySdk();
+    const [user, setUser] = useState<UserProfile | null>(null);
 
     useEffect(() => {
-        const fetchToken = async () => {
-            setToken(await getAccessToken());
-        }
-        const fetchUser = async () => {
-            if (user || !token) return;
-            getUser(token).then(user => setUser(user));
-        }
-
-        fetchToken().then();
-        fetchUser().then();
-        console.log(token, user);
-    }, [getAccessToken, getUser, token, user]);
+        if (!sdk) return;
+        sdk.currentUser.profile().then((user) => setUser(() => user));
+    }, [sdk]);
 
     return <Card className={"w-full h-2/5"}>
         <CardContent className={"w-full h-full p-4 flex justify-start gap-4"}>
             {user ?
-                <img src={user.imageUrl} alt={user.display_name} className={"w-2/5 h-full rounded-xl"}/>
+                <img src={user.images[0]?.url} alt={user.display_name} className={"w-2/5 h-full rounded-xl"}/>
                 :
                 <Skeleton className={"w-2/5 h-full"}/>
             }
@@ -49,13 +36,13 @@ export default function UserCard() {
                                 }
                                 <H4>{user.country}</H4>
                             </span>
-                            <Link to={user.url} target="_blank">
+                            <Link to={user.external_urls.spotify} target="_blank">
                                 <Link2 className={"!w-12 !h-12"}/>
                             </Link>
                         </H1>
                         <H4 className={"mt-auto"}>id : {user.id}</H4>
                         <H4>email : {user.email}</H4>
-                        <H4>{user.followers} followers</H4>
+                        <H4>{user.followers.total} followers</H4>
                     </>
                     :
                     <>
