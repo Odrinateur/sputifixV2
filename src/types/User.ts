@@ -1,4 +1,4 @@
-export interface UserReponse {
+export interface UserResponse {
     country: string;
     display_name: string;
     email: string;
@@ -9,13 +9,11 @@ export interface UserReponse {
         total: number;
     }
     id: string;
-    images: [
-        {
-            url: string;
-            height: number;
-            width: number;
-        }
-    ];
+    images: {
+        url: string;
+        height: number | null;
+        width: number | null;
+    }[];
     product: string;
     uri: string;
 }
@@ -31,15 +29,14 @@ export default class User {
     product: string;
     lastUpdated: number = Date.now();
 
-    constructor(response: UserReponse) {
+    constructor(response: UserResponse) {
         this.country = response.country;
         this.display_name = response.display_name;
         this.email = response.email;
         this.url = response.external_urls.spotify;
         this.followers = response.followers.total;
         this.id = response.id;
-        // Biggest image and it's not especially the first one
-        this.imageUrl = response.images.sort((a, b) => b.height - a.height)[0].url;
+        this.imageUrl = response.images.sort((a, b) => (b.height ?? 0) - (a.height ?? 0))[0].url;
         this.product = response.product;
     }
 }
