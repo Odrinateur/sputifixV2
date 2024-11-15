@@ -1,10 +1,12 @@
 import {createContext, ReactNode, useContext} from "react";
 import User from "@/types/User.ts";
 import secureLocalStorage from "react-secure-storage";
-import GetUser from "@/api/user.ts";
+import {GetUser, GetUserTopItems} from "@/api/user.ts";
+import {TopArtists} from "@/types/Artist.ts";
 
 type StorageContextType = {
     getUser(token: string): Promise<User | null>;
+    getUserTopArtists(token: string, limit: number): Promise<TopArtists | null>;
 };
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
@@ -40,11 +42,29 @@ export const StorageProvider = ({children}: { children: ReactNode }) => {
 
         const user = await GetUser(token);
         setItem('user', JSON.stringify(user));
-        return user;
+        return user ?? null;
+    }
+
+    const getUserTopArtists = async (token: string, limit: number): Promise<TopArtists | null> => {
+        const userInStorage = getItem('topArtists');
+        if (userInStorage) {
+            const topArtists = JSON.parse(userInStorage) as TopArtists;
+            if (topArtists.lastUpdated + 3600 * 1000 > Date.now()) {
+                return topArtists.artists.length > limit ? {
+                    total: topArtists.total,
+                    artists: topArtists.artists.slice(0, limit)
+                } as TopArtists : topArtists;
+            }
+        }
+
+        const topArtists = await GetUserTopItems(token, 'artists');
+        setItem('topArtists', JSON.stringify(topArtists));
+        return topArtists ?? null
     }
 
     const storage = {
-        getUser
+        getUser,
+        getUserTopArtists,
     }
 
     return (
