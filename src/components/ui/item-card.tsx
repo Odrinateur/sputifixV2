@@ -17,7 +17,7 @@ function ArtistCard({artist}: { artist: Artist }) {
 
 function PlaylistCard({playlist}: { playlist: Playlist }) {
     return <Container>
-        <Cover images={playlist.images} coverType={"playlist"} className={"w-20 h-20"}/>
+        <Cover images={playlist.images} coverType={"playlist"} className={"w-max aspect-square rounded-lg"}/>
         <H3>{playlist.name}</H3>
         <H4>{playlist.owner.display_name}</H4>
     </Container>
@@ -25,7 +25,7 @@ function PlaylistCard({playlist}: { playlist: Playlist }) {
 
 function TrackCard({track}: { track: Track }) {
     return <Container>
-        <Cover images={track.album.images} coverType={"track"} className={"w-20 h-20"}/>
+        <Cover images={track.album.images} coverType={"track"} className={"w-max aspect-square rounded-lg"}/>
         <H3>{track.name}</H3>
         <H4>{track.artists.map(artist => artist.name).join(", ")}</H4>
     </Container>
