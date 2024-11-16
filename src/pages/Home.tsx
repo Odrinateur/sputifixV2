@@ -1,5 +1,5 @@
-import {MainContainerWithNav} from "@/components/MainContainer.tsx";
-import UserCard from "@/components/UserCard.tsx";
+import {MainContainerWithNav} from "@/components/ui/main-container.tsx";
+import UserCard from "@/components/user-card.tsx";
 
 
 export default function Home() {

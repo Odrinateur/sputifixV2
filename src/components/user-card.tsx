@@ -20,9 +20,10 @@ export default function UserCard() {
     }, [getUser, user]);
 
     return <Card className={"w-full h-2/5"}>
-        <CardContent className={"w-full h-full p-4 flex justify-start gap-4"}>
+        <CardContent className={"w-full h-full p-4 flex flex-col sm:flex-row justify-start gap-4"}>
             {user ?
-                <Cover images={user.images} coverType={"user"} className={"w-2/5 h-full rounded-xl"}/>
+                <Cover images={user.images} coverType={"user"}
+                       className={"w-2/5 h-full rounded-xl self-center sm:items-start"}/>
                 :
                 <Skeleton className={"w-2/5 h-full"}/>
             }
