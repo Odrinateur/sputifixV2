@@ -6,6 +6,7 @@ import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {H1, H4} from "@/components/ui/typography.tsx";
 import {BadgeCheck, Link2} from "lucide-react";
 import {Link} from "react-router-dom";
+import Cover from "@/components/ui/cover.tsx";
 
 export default function UserCard() {
     const sdk = useSpotifySdk();
@@ -19,7 +20,7 @@ export default function UserCard() {
     return <Card className={"w-full h-2/5"}>
         <CardContent className={"w-full h-full p-4 flex justify-start gap-4"}>
             {user ?
-                <img src={user.images[0]?.url} alt={user.display_name} className={"w-2/5 h-full rounded-xl"}/>
+                <Cover images={user.images} coverType={"user"} className={"w-2/5 h-full rounded-xl"}/>
                 :
                 <Skeleton className={"w-2/5 h-full"}/>
             }
@@ -46,10 +47,10 @@ export default function UserCard() {
                     </>
                     :
                     <>
-                        <Skeleton className={"w-1/2 h-1/5"}/>
-                        <Skeleton className={"w-1/2 h-1/5 mt-auto"}/>
-                        <Skeleton className={"w-1/2 h-1/5"}/>
-                        <Skeleton className={"w-1/2 h-1/5"}/>
+                        <Skeleton className={"w-1/2 h-1/6"}/>
+                        <Skeleton className={"w-1/2 h-1/6 mt-auto"}/>
+                        <Skeleton className={"w-1/2 h-1/6"}/>
+                        <Skeleton className={"w-1/2 h-1/6"}/>
                     </>
                 }
             </div>
