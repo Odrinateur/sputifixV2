@@ -1,21 +1,23 @@
 import {UserProfile} from "@spotify/web-api-ts-sdk";
 import {useEffect, useState} from "react";
-import {useSpotifySdk} from "@/context/SpotifyContext.tsx";
 import {Card, CardContent} from "@/components/ui/card.tsx";
 import {Skeleton} from "@/components/ui/skeleton.tsx";
 import {H1, H4} from "@/components/ui/typography.tsx";
 import {BadgeCheck, Link2} from "lucide-react";
 import {Link} from "react-router-dom";
 import Cover from "@/components/ui/cover.tsx";
+import {useStorage} from "@/context/StorageContext.tsx";
 
 export default function UserCard() {
-    const sdk = useSpotifySdk();
+    const {getUser} = useStorage();
     const [user, setUser] = useState<UserProfile | null>(null);
 
     useEffect(() => {
-        if (!sdk) return;
-        sdk.currentUser.profile().then((user) => setUser(() => user));
-    }, [sdk]);
+        (async () => {
+            if (user) return;
+            setUser(await getUser());
+        })()
+    }, [getUser, user]);
 
     return <Card className={"w-full h-2/5"}>
         <CardContent className={"w-full h-full p-4 flex justify-start gap-4"}>

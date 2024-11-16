@@ -2,8 +2,8 @@ import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import {ThemeProvider} from '@/context/ThemeContext';
 import Home from '@/pages/Home.tsx';
 import Settings from '@/pages/Settings';
-import {SpotifySdkProvider} from "@/context/SpotifyContext.tsx";
 import {useSpotify} from "@/hooks/useSpotify.ts";
+import {StorageProvider} from "@/context/StorageContext.tsx";
 
 
 export default function App() {
@@ -13,7 +13,7 @@ export default function App() {
     const sdk = useSpotify(clientId, redirectUrl, scopes);
 
     return sdk ? (
-        <SpotifySdkProvider sdk={sdk}>
+        <StorageProvider sdk={sdk}>
             <ThemeProvider>
                 <Router>
                     <Routes>
@@ -22,6 +22,6 @@ export default function App() {
                     </Routes>
                 </Router>
             </ThemeProvider>
-        </SpotifySdkProvider>
+        </StorageProvider>
     ) : <></>;
 }
