@@ -8,6 +8,7 @@ export default function Home() {
         <MainContainerWithNav>
             <UserCard/>
             <TopItems type={"artists"}/>
+            <TopItems type={"tracks"}/>
         </MainContainerWithNav>
     );
 }
