@@ -5,7 +5,7 @@ import {H3, H4} from "@/components/ui/typography.tsx";
 
 function Container({children}: { children: ReactNode }) {
     return <div
-        className="h-fit flex flex-col justify-start items-center p-2 gap-2 border text-card-foreground shadow-sm rounded-lg">{children}</div>;
+        className="h-fit flex flex-col justify-start items-center p-2 gap-2 border text-card-foreground shadow-sm rounded-lg text-center">{children}</div>;
 }
 
 function ArtistCard({artist}: { artist: Artist }) {
