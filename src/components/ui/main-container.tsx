@@ -10,16 +10,16 @@ interface MainContainerProps {
 function MainContainer({children, withNav, className}: MainContainerProps) {
     return (
         <main
-            className={`${className} flex p-10 w-full ${withNav ? 'flex-col-reverse lg:flex-row justify-start items-start overflow-y-auto' : 'h-full flex-col justify-start items-center'}`}>
+            className={`${className} flex p-10 w-full h-full ${withNav ? 'flex-col-reverse lg:flex-row justify-start items-start' : 'flex-col justify-start items-center'}`}>
             {children}
         </main>
     );
 }
 
-function MainContainerWithNav({children, className}: MainContainerProps) {
+function MainContainerWithNav({children}: MainContainerProps) {
     return (
-        <MainContainer className={className + " gap-5"} withNav>
-            <div className={"w-full lg:w-4/5 h-full overflow-y-auto"}>
+        <MainContainer className={"gap-5"} withNav>
+            <div className={"flex flex-col gap-10 w-full lg:w-4/5 h-full overflow-y-auto"}>
                 {children}
             </div>
             <Navbar/>
