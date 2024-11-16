@@ -17,13 +17,12 @@ export default function TopItems({type}: TopItemsProps) {
 
     useEffect(() => {
         (async () => {
-            if (items) return;
             if (type === "artists")
                 setItems(await getUserTopItems<Artist>(type, limit, timeRange));
             else
                 setItems(await getUserTopItems<Track>(type, limit, timeRange));
         })()
-    }, [getUserTopItems, setItems, items, type, limit, timeRange]);
+    }, [getUserTopItems, type, limit, timeRange]);
 
     return (
         <Card className={"w-full"}>
