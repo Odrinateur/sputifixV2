@@ -14,6 +14,13 @@ function Container({children, className = '', isRelative = false}: {
 }
 
 function ArtistCard({artist}: { artist: Artist }) {
+    try {
+        if (!artist.images) return <ArtistSkeleton/>
+    } catch (e) {
+        console.log(e)
+        return <ArtistSkeleton/>
+
+    }
     return <Container isRelative>
         <Cover images={artist.images} coverType={"artist"}
                className={"w-max aspect-square rounded-lg brightness-[0.8]"}/>
@@ -30,6 +37,13 @@ function PlaylistCard({playlist}: { playlist: Playlist }) {
 }
 
 function TrackCard({track}: { track: Track }) {
+    try {
+        if (!track.album.images) return <TrackSkeleton/>
+    } catch (e) {
+        console.log(e)
+        return <TrackSkeleton/>
+    }
+
     return <Container>
         <Cover images={track.album.images} coverType={"track"} className={"w-max aspect-square rounded-lg"}/>
         <H3>{track.name}</H3>
