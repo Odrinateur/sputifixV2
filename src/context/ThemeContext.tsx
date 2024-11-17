@@ -1,14 +1,15 @@
 import {createContext, ReactNode, useContext, useState, useEffect} from 'react';
+import {ThemeType} from "@/types/common.ts";
 
 type ThemeContextType = {
     theme: string;
-    setTheme: (theme: string) => void;
+    setTheme: (theme: ThemeType) => void;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({children}: { children: ReactNode }) => {
-    const [theme, setTheme] = useState('dark');
+    const [theme, setTheme] = useState<ThemeType>('dark');
 
     useEffect(() => {
         document.body.className = '';
