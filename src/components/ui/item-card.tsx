@@ -5,7 +5,7 @@ import {H3, H4} from "@/components/ui/typography.tsx";
 
 function Container({children, isRelative = false}: { children: ReactNode, isRelative?: boolean }) {
     return <div
-        className={`h-fit flex flex-col justify-start items-center text-card-foreground shadow-sm rounded-lg text-center ${isRelative ? 'relative' : 'p-2 border'}`}>{children}</div>;
+        className={`h-fit flex flex-col justify-start items-center text-card-foreground rounded-lg text-center ${isRelative ? 'relative' : ''}`}>{children}</div>;
 }
 
 function ArtistCard({artist}: { artist: Artist }) {
