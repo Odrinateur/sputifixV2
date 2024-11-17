@@ -4,6 +4,7 @@ import Home from '@/pages/Home.tsx';
 import Settings from '@/pages/Settings';
 import {useSpotify} from "@/hooks/useSpotify.ts";
 import {StorageProvider} from "@/context/StorageContext.tsx";
+import Top from "@/pages/TopItems.tsx";
 
 
 export default function App() {
@@ -18,6 +19,8 @@ export default function App() {
                 <Router>
                     <Routes>
                         <Route path="/" element={<Home/>}/>
+                        <Route path="/top/artists" element={<Top type={"artists"}/>}/>
+                        <Route path="/top/tracks" element={<Top type={"tracks"}/>}/>
                         <Route path="/settings" element={<Settings/>}/>
                     </Routes>
                 </Router>
