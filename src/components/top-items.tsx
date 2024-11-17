@@ -27,12 +27,12 @@ export default function TopItems({type}: TopItemsProps) {
     return (
         <Card className={"w-full"}>
             <CardHeader>
-                <CardTitle className={"flex justify-between"}>
+                <CardTitle className={"flex justify-between items-center"}>
                     {type === "artists" ? "Top Artists" : "Top Tracks"}
                     <Select
                         onValueChange={(value) => setTimeRange(value as 'short_term' | 'medium_term' | 'long_term')}
                         defaultValue={timeRange}>
-                        <SelectTrigger className={"w-1/4"}>
+                        <SelectTrigger className={"w-40"}>
                             {timeRange === "short_term" ? "4 weeks" : timeRange === "medium_term" ? "6 months" : "1 year"}
                         </SelectTrigger>
                         <SelectContent>
