@@ -53,6 +53,8 @@ export type LimitType =
     | 47
     | 48
     | 49;
-// export type SettingsType = "home" | "top_items";
+export type HomeDisplayLimitType = 4 | 8 | 12 | 16 | 20;
+export type TopDisplayLimit = 50 | 100 | 150 | 200 | 250;
 
-
+export const HomeDisplayLimits: HomeDisplayLimitType[] = [4, 8, 12, 16, 20];
+export const TopDisplayLimits: TopDisplayLimit[] = [50, 100, 150, 200, 250];
