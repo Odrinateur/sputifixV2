@@ -93,8 +93,10 @@ export const StorageProvider = ({sdk, children}: { sdk: SpotifyApi, children: Re
 
     async function getUserTopItems<T extends Artist | Track>(type: 'artists' | 'tracks', limit: number, timeRange: TimeRangeType = 'medium_term'): Promise<T[] | null> {
         const topItemsInStorage = getItem(`top_${type}`, timeRange);
-        if (topItemsInStorage && topItemsInStorage.length >= limit && topItemsInStorage.lastUpdated + 3600 * 1000 > Date.now()) {
-            return JSON.parse(topItemsInStorage.value);
+        if (topItemsInStorage && topItemsInStorage.lastUpdated + 3600 * 1000 > Date.now()) {
+            const topItems = JSON.parse(topItemsInStorage.value);
+            if (topItems.length >= limit)
+                return topItems.slice(0, limit) as T[];
         }
 
         let currentLimit = getCurrentLimit(limit);
@@ -108,7 +110,7 @@ export const StorageProvider = ({sdk, children}: { sdk: SpotifyApi, children: Re
             currentLimit = getCurrentLimit(limit - offset);
         }
 
-        setItem(`top_${type}`, JSON.stringify({topItems}), timeRange);
+        setItem(`top_${type}`, JSON.stringify(topItems), timeRange);
         return topItems.length > 0 ? topItems : null;
     }
 
