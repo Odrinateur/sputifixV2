@@ -1,6 +1,13 @@
 import type {Artist, Playlist, Track} from "@spotify/web-api-ts-sdk";
 import {CardContent} from "@/components/ui/card.tsx";
-import {ArtistCard, PlaylistCard, TrackCard} from "@/components/ui/item-card.tsx";
+import {
+    ArtistCard,
+    ArtistSkeleton,
+    PlaylistCard,
+    PlaylistSkeleton,
+    TrackCard,
+    TrackSkeleton
+} from "@/components/ui/item-card.tsx";
 
 interface ItemsGridProps {
     items: Artist[] | Track[] | Playlist[] | null;
@@ -22,7 +29,16 @@ export default function ItemsGrid({items, type}: ItemsGridProps) {
                 }
             })
             :
-            <></>
+            Array.from({length: 8}).map((_, index) => {
+                switch (type) {
+                    case "Artists":
+                        return <ArtistSkeleton key={index}/>;
+                    case "Tracks":
+                        return <TrackSkeleton key={index}/>;
+                    case "Playlists":
+                        return <PlaylistSkeleton key={index}/>;
+                }
+            })
         }
     </CardContent>
 }

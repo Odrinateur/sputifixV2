@@ -2,10 +2,15 @@ import {Artist, Playlist, Track} from "@spotify/web-api-ts-sdk";
 import {ReactNode} from "react";
 import Cover from "@/components/ui/cover.tsx";
 import {H3, H4} from "@/components/ui/typography.tsx";
+import {Skeleton} from "@/components/ui/skeleton.tsx";
 
-function Container({children, isRelative = false}: { children: ReactNode, isRelative?: boolean }) {
+function Container({children, className = '', isRelative = false}: {
+    children: ReactNode,
+    className?: string,
+    isRelative?: boolean
+}) {
     return <div
-        className={`h-fit flex flex-col justify-start items-center text-card-foreground rounded-lg text-center ${isRelative ? 'relative' : ''}`}>{children}</div>;
+        className={`h-fit flex flex-col justify-start items-center text-card-foreground rounded-lg text-center ${isRelative ? 'relative' : ''} ${className}`}>{children}</div>;
 }
 
 function ArtistCard({artist}: { artist: Artist }) {
@@ -32,4 +37,27 @@ function TrackCard({track}: { track: Track }) {
     </Container>
 }
 
-export {ArtistCard, PlaylistCard, TrackCard};
+function ArtistSkeleton() {
+    return <Container isRelative className={"w-full"}>
+        <Skeleton className={"w-full aspect-square rounded-lg"}/>
+        <Skeleton className={"absolute bottom-2 w-2/3 h-6"}/>
+    </Container>
+}
+
+function PlaylistSkeleton() {
+    return <Container className={"gap-1"}>
+        <Skeleton className={"w-full aspect-square rounded-lg"}/>
+        <Skeleton className={"w-2/3 h-6"}/>
+        <Skeleton className={"w-1/2 h-6"}/>
+    </Container>
+}
+
+function TrackSkeleton() {
+    return <Container className={"gap-1"}>
+        <Skeleton className={"w-full aspect-square rounded-lg"}/>
+        <Skeleton className={"w-2/3 h-6"}/>
+        <Skeleton className={"w-1/2 h-6"}/>
+    </Container>
+}
+
+export {ArtistCard, PlaylistCard, TrackCard, ArtistSkeleton, PlaylistSkeleton, TrackSkeleton};

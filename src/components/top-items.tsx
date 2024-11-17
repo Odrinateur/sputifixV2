@@ -41,7 +41,10 @@ export default function TopItems({type, isHome = true}: TopItemsProps) {
                         type === "artists" ? "Top Artists" : "Top Tracks"
                     }
                     <Select
-                        onValueChange={(value) => setTimeRange(value as TimeRangeType)}
+                        onValueChange={(value) => {
+                            setTimeRange(value as TimeRangeType);
+                            setItems(null);
+                        }}
                         defaultValue={timeRange}>
                         <SelectTrigger className={"w-40"}>
                             {timeRange === "short_term" ? "4 weeks" : timeRange === "medium_term" ? "6 months" : "1 year"}
