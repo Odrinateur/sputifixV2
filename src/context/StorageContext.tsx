@@ -1,37 +1,44 @@
-import {createContext, ReactNode, useContext} from "react";
-import secureLocalStorage from "react-secure-storage";
-import {Artist, SpotifyApi, Track, UserProfile} from "@spotify/web-api-ts-sdk";
-import {LimitType, TimeRangeType, TopItemsType} from "@/types/common.ts";
+import { createContext, ReactNode, useContext } from 'react';
+import secureLocalStorage from 'react-secure-storage';
+import { Artist, SavedTrack, SpotifyApi, Track, UserProfile } from '@spotify/web-api-ts-sdk';
+import { LimitType, TimeRangeType, TopItemsType } from '@/types/common.ts';
 
 type StorageContextType = {
     getSettings(key: string, secondKey?: string): string;
     setSettings(key: string, jsonValue: string, secondKey?: string): void;
     getUser(): Promise<UserProfile | null>;
-    getUserTopItems<T extends Artist | Track>(type: TopItemsType, limit: number, timeRange?: TimeRangeType): Promise<T[] | null>;
+    getUserTopItems<T extends Artist | Track>(
+        type: TopItemsType,
+        limit: number,
+        timeRange?: TimeRangeType
+    ): Promise<T[] | null>;
+    getUserLikes(): Promise<SavedTrack[] | null>;
 };
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
 
-export const StorageProvider = ({sdk, children}: { sdk: SpotifyApi, children: ReactNode }) => {
+export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: ReactNode }) => {
     const initStorage = () => {
-        if (!secureLocalStorage.getItem('storage'))
-            secureLocalStorage.setItem('storage', JSON.stringify({}));
+        if (!secureLocalStorage.getItem('storage')) secureLocalStorage.setItem('storage', JSON.stringify({}));
         if (!secureLocalStorage.getItem('settings'))
-            secureLocalStorage.setItem('settings', JSON.stringify({
-                theme: 'dark',
-                home: {
-                    limit: 12,
-                    timeRange: 'medium_term'
-                },
-                top_items: {
-                    limit: 100,
-                    timeRange: 'medium_term'
-                },
-                statsfm: {
-                    display: true
-                }
-            }));
-    }
+            secureLocalStorage.setItem(
+                'settings',
+                JSON.stringify({
+                    theme: 'dark',
+                    home: {
+                        limit: 12,
+                        timeRange: 'medium_term',
+                    },
+                    top_items: {
+                        limit: 100,
+                        timeRange: 'medium_term',
+                    },
+                    statsfm: {
+                        display: true,
+                    },
+                })
+            );
+    };
     initStorage();
 
     const getItem = (key: string, secondKey?: string) => {
@@ -40,21 +47,20 @@ export const StorageProvider = ({sdk, children}: { sdk: SpotifyApi, children: Re
             const storageJson = JSON.parse(storage);
             return secondKey ? storageJson[key]?.[secondKey] : storageJson[key];
         }
-    }
+    };
 
     const setItem = (key: string, jsonValue: string, secondKey?: string) => {
         const storage = secureLocalStorage.getItem('storage');
         if (storage && typeof storage === 'string') {
             const storageJson = JSON.parse(storage);
-            const jsonToStore = {value: jsonValue, lastUpdated: Date.now()};
+            const jsonToStore = { value: jsonValue, lastUpdated: Date.now() };
             if (secondKey) {
                 storageJson[key] = storageJson[key] || {};
                 storageJson[key][secondKey] = jsonToStore;
-            } else
-                storageJson[key] = jsonToStore;
+            } else storageJson[key] = jsonToStore;
             secureLocalStorage.setItem('storage', JSON.stringify(storageJson));
         }
-    }
+    };
 
     const getSettings = (key: string, secondKey?: string) => {
         const settings = secureLocalStorage.getItem('settings');
@@ -63,21 +69,20 @@ export const StorageProvider = ({sdk, children}: { sdk: SpotifyApi, children: Re
             return secondKey ? settingsJson[key]?.[secondKey] : settingsJson[key];
         }
         return '';
-    }
+    };
 
     const setSettings = (key: string, jsonValue: string, secondKey?: string) => {
         const settings = secureLocalStorage.getItem('settings');
         if (settings && typeof settings === 'string') {
             const settingsJson = JSON.parse(settings);
-            const jsonToStore = {value: jsonValue, lastUpdated: Date.now()};
+            const jsonToStore = { value: jsonValue, lastUpdated: Date.now() };
             if (secondKey) {
                 settingsJson[key] = settingsJson[key] || {};
                 settingsJson[key][secondKey] = jsonToStore;
-            } else
-                settingsJson[key] = jsonToStore;
+            } else settingsJson[key] = jsonToStore;
             secureLocalStorage.setItem('settings', JSON.stringify(settingsJson));
         }
-    }
+    };
 
     const getCurrentLimit = (limit: number) => Math.min(50, limit) as LimitType;
 
@@ -89,14 +94,17 @@ export const StorageProvider = ({sdk, children}: { sdk: SpotifyApi, children: Re
         const user = await sdk.currentUser.profile();
         setItem('user', JSON.stringify(user));
         return user ?? null;
-    }
+    };
 
-    async function getUserTopItems<T extends Artist | Track>(type: 'artists' | 'tracks', limit: number, timeRange: TimeRangeType = 'medium_term'): Promise<T[] | null> {
+    async function getUserTopItems<T extends Artist | Track>(
+        type: 'artists' | 'tracks',
+        limit: number,
+        timeRange: TimeRangeType = 'medium_term'
+    ): Promise<T[] | null> {
         const topItemsInStorage = getItem(`top_${type}`, timeRange);
         if (topItemsInStorage && topItemsInStorage.lastUpdated + 3600 * 1000 > Date.now()) {
             const topItems = JSON.parse(topItemsInStorage.value);
-            if (topItems.length >= limit)
-                return topItems.slice(0, limit) as T[];
+            if (topItems.length >= limit) return topItems.slice(0, limit) as T[];
         }
 
         let currentLimit = getCurrentLimit(limit);
@@ -105,7 +113,7 @@ export const StorageProvider = ({sdk, children}: { sdk: SpotifyApi, children: Re
 
         while (offset < limit) {
             const items = await sdk.currentUser.topItems(type, timeRange, currentLimit, offset);
-            topItems.push(...(items.items) as T[]);
+            topItems.push(...(items.items as T[]));
             offset += currentLimit;
             currentLimit = getCurrentLimit(limit - offset);
         }
@@ -114,20 +122,35 @@ export const StorageProvider = ({sdk, children}: { sdk: SpotifyApi, children: Re
         return topItems.length > 0 ? topItems : null;
     }
 
+    async function getUserLikes(): Promise<SavedTrack[] | null> {
+        const likesInStorage = getItem('likes');
+        if (likesInStorage && likesInStorage.lastUpdated + 3600 * 1000 > Date.now())
+            return JSON.parse(likesInStorage.value);
+
+        const likes = [];
+        let response = await sdk.currentUser.tracks.savedTracks(50, 0);
+        likes.push(...response.items);
+        while (response.next) {
+            const next = response.next;
+            response = await sdk.makeRequest('GET', next);
+            likes.push(...response.items);
+        }
+        setItem('likes', JSON.stringify(likes), 'likes');
+        return likes ?? null;
+    }
+
     const storage = {
         getSettings,
         setSettings,
         getUser,
         getUserTopItems,
-    }
+        getUserLikes,
+    };
 
-    return (
-        <StorageContext.Provider value={storage}>
-            {children}
-        </StorageContext.Provider>
-    );
+    return <StorageContext.Provider value={storage}>{children}</StorageContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useStorage = () => {
     const context = useContext(StorageContext);
     if (!context) {

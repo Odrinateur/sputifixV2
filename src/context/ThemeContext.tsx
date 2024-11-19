@@ -1,5 +1,5 @@
-import {createContext, ReactNode, useContext, useState, useEffect} from 'react';
-import {ThemeType} from "@/types/common.ts";
+import { createContext, ReactNode, useContext, useState, useEffect } from 'react';
+import { ThemeType } from '@/types/common.ts';
 
 type ThemeContextType = {
     theme: string;
@@ -8,7 +8,7 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider = ({children}: { children: ReactNode }) => {
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     const [theme, setTheme] = useState<ThemeType>('dark');
 
     useEffect(() => {
@@ -16,13 +16,10 @@ export const ThemeProvider = ({children}: { children: ReactNode }) => {
         document.body.classList.add(theme);
     }, [theme]);
 
-    return (
-        <ThemeContext.Provider value={{theme, setTheme}}>
-            {children}
-        </ThemeContext.Provider>
-    );
+    return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = () => {
     const context = useContext(ThemeContext);
     if (!context) {

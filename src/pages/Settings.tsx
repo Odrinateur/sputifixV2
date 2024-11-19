@@ -1,11 +1,12 @@
 import React from 'react';
-import {useTheme} from '@/context/ThemeContext';
+import { useTheme } from '@/context/ThemeContext';
+import { ThemeType } from '@/types/common';
 
 export default function Settings() {
-    const {theme, setTheme} = useTheme();
+    const { theme, setTheme } = useTheme();
 
     const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setTheme(event.target.value);
+        setTheme(event.target.value as ThemeType);
     };
 
     return (

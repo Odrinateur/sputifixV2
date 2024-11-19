@@ -1,8 +1,8 @@
-export type TimeRangeType = "short_term" | "medium_term" | "long_term";
-export type ThemeType = "light" | "dark" | "dark green";
-export type TopItemsType = "artists" | "tracks";
+export type TimeRangeType = 'short_term' | 'medium_term' | 'long_term';
+export type ThemeType = 'light' | 'dark' | 'dark green';
+export type TopItemsType = 'artists' | 'tracks';
 export type LimitType =
-    0
+    | 0
     | 50
     | 1
     | 2
