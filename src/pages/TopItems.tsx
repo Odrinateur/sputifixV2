@@ -1,12 +1,26 @@
-import {MainContainerWithNav} from "@/components/ui/main-container.tsx";
-import TopItems from "@/components/top-items.tsx";
-import {TopItemsType} from "@/types/common.ts";
+import { TopItemsType } from "@/types/common.ts";
+import { Artist, Track } from "@spotify/web-api-ts-sdk";
+import { ArtistsGrid, TracksGrid } from "@/components/ui/items-grid";
+import TopItems from "@/components/top-items";
 
-
-export default function Top({type}: { type: TopItemsType }) {
+export function TopArtists({ isHome = true }: { isHome?: boolean }) {
     return (
-        <MainContainerWithNav>
-            <TopItems type={type} isHome={false}/>
-        </MainContainerWithNav>
+        <TopItems<Artist>
+            isHome={isHome}
+            itemType={"Artists" as TopItemsType}
+            title="Top Artists"
+            GridComponent={ArtistsGrid}
+        />
+    );
+}
+
+export function TopTracks({ isHome = true }: { isHome?: boolean }) {
+    return (
+        <TopItems<Track>
+            isHome={isHome}
+            itemType={"Tracks" as TopItemsType}
+            title="Top Tracks"
+            GridComponent={TracksGrid}
+        />
     );
 }
