@@ -5,10 +5,10 @@ import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { H1, H4 } from '@/components/ui/typography.tsx';
 import { BadgeCheck, Link2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Cover from '@/components/ui/cover.tsx';
+import { Cover } from '@/components/ui/cover.tsx';
 import { useStorage } from '@/context/StorageContext.tsx';
 
-export default function UserCard() {
+export function UserCard() {
     const { getUser } = useStorage();
     const [user, setUser] = useState<UserProfile | null>(null);
 

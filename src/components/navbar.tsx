@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button.tsx';
 import { Link } from 'react-router-dom';
 import { House, Settings, TrendingUp } from 'lucide-react';
 
-export default function Navbar() {
+export function Navbar() {
     return (
         <nav className={'w-full lg:w-1/5 flex flex-col gap-10 justify-start'}>
             <Card

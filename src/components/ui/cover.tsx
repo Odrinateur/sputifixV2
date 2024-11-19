@@ -9,7 +9,7 @@ interface CoverProps {
     className?: string;
 }
 
-export default function Cover({ images, coverType, className }: CoverProps) {
+export function Cover({ images, coverType, className }: CoverProps) {
     if (!images || images.length === 0) {
         switch (coverType) {
             case 'album':

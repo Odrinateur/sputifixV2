@@ -1,6 +1,6 @@
 import { Artist, Playlist, Track } from '@spotify/web-api-ts-sdk';
 import { ReactNode } from 'react';
-import Cover from '@/components/ui/cover.tsx';
+import { Cover } from '@/components/ui/cover.tsx';
 import { H3, H4 } from '@/components/ui/typography.tsx';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 
@@ -15,7 +15,9 @@ function Container({
 }) {
     return (
         <div
-            className={`h-fit flex flex-col justify-start items-center text-card-foreground rounded-lg text-center ${isRelative ? 'relative' : ''} ${className}`}
+            className={`h-fit flex flex-col justify-start items-center text-card-foreground rounded-lg text-center ${
+                isRelative ? 'relative' : ''
+            } ${className}`}
         >
             {children}
         </div>

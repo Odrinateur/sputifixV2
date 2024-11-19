@@ -14,7 +14,7 @@ import { SquareArrowOutUpRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Artist, Track } from '@spotify/web-api-ts-sdk';
 
-export default function TopItems<T extends Artist | Track>({
+export function TopItems<T extends Artist | Track>({
     isHome = true,
     itemType,
     title,
@@ -72,8 +72,8 @@ export default function TopItems<T extends Artist | Track>({
                                 {timeRange === 'short_term'
                                     ? '4 weeks'
                                     : timeRange === 'medium_term'
-                                      ? '6 months'
-                                      : '1 year'}
+                                    ? '6 months'
+                                    : '1 year'}
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="short_term">4 weeks</SelectItem>

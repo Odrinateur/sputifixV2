@@ -2,7 +2,7 @@ import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { ThemeType } from '@/types/common';
 
-export default function Settings() {
+export function Settings() {
     const { theme, setTheme } = useTheme();
 
     const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
