@@ -56,5 +56,7 @@ export type LimitType =
 export type HomeDisplayLimitType = 4 | 8 | 12 | 16 | 20;
 export type TopDisplayLimit = 50 | 100 | 150 | 200 | 250;
 
+export type LoadingStates = 'idle' | 'loading' | 'end';
+
 export const HomeDisplayLimits: HomeDisplayLimitType[] = [4, 8, 12, 16, 20];
 export const TopDisplayLimits: TopDisplayLimit[] = [50, 100, 150, 200, 250];

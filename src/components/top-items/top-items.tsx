@@ -1,6 +1,7 @@
 import {
     HomeDisplayLimits,
     HomeDisplayLimitType,
+    LoadingStates,
     TimeRangeType,
     TopDisplayLimit,
     TopDisplayLimits,
@@ -14,6 +15,7 @@ import { SquareArrowOutUpRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Artist, Track } from '@spotify/web-api-ts-sdk';
 import { H3 } from '../ui/typography';
+import { RefreshTopArtistsButton, RefreshTopTracksButton } from '../refresh';
 
 export function TopItems<T extends Artist | Track>({
     isHome = true,
@@ -40,11 +42,28 @@ export function TopItems<T extends Artist | Track>({
             : (getSettings('top_items', 'timeRange') as TimeRangeType)
     );
 
+    const [loadingState, setLoadingState] = useState<LoadingStates>('idle');
+
     useEffect(() => {
         (async () => {
-            setItems(await getUserTopItems<T>(itemType, limit, timeRange));
+            await getUserTopItems<T>(itemType, limit, timeRange).then((items) => {
+                setItems(items);
+                setLoadingState('idle');
+            });
         })();
     }, [getUserTopItems, itemType, limit, timeRange]);
+
+    useEffect(() => {
+        (async () => {
+            if (loadingState === 'loading') setItems(null);
+            else if (loadingState === 'end') {
+                await getUserTopItems<T>(itemType, limit, timeRange).then((items) => {
+                    setItems(items);
+                    setLoadingState('idle');
+                });
+            } else if (loadingState === 'idle') return;
+        })();
+    }, [loadingState, getUserTopItems, itemType, limit, timeRange]);
 
     return (
         <Card className={'w-full'}>
@@ -104,10 +123,15 @@ export function TopItems<T extends Artist | Track>({
                                       ))}
                             </SelectContent>
                         </Select>
+                        {!isHome && itemType === 'artists' ? (
+                            <RefreshTopArtistsButton setLoadingState={setLoadingState} />
+                        ) : !isHome && itemType === 'tracks' ? (
+                            <RefreshTopTracksButton setLoadingState={setLoadingState} />
+                        ) : null}
                     </div>
                 </CardTitle>
             </CardHeader>
-            <GridComponent items={items} />
+            <GridComponent items={loadingState == 'loading' ? null : items} />
         </Card>
     );
 }

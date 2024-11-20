@@ -3,49 +3,52 @@ import { Button } from './ui/button';
 import clsx from 'clsx';
 import { RefreshCcw } from 'lucide-react';
 import { useStorage } from '@/context/StorageContext';
+import { LoadingStates } from '@/types/common';
 
 interface RefreshButtonProps {
     onClick: () => Promise<void>;
-    setEndLoading: (loading: boolean) => void;
+    setLoadingState?: (value: LoadingStates) => void;
 }
 
-function RefreshButton({ onClick, setEndLoading }: RefreshButtonProps) {
-    const [loading, setLoadingState] = useState(false);
+function RefreshButton({ onClick, setLoadingState }: RefreshButtonProps) {
+    const [isLoading, setIsLoadingState] = useState(false);
 
     const handleClick = async () => {
-        setLoadingState(true);
-        await onClick();
-        setLoadingState(false);
-        setEndLoading(true);
+        setIsLoadingState(true);
+        setLoadingState?.('loading');
+        await onClick().then(() => {
+            setLoadingState?.('end');
+            setIsLoadingState(false);
+        });
     };
 
     return (
-        <Button variant="default" onClick={handleClick} disabled={loading}>
-            <RefreshCcw className={'h-4 w-4' + clsx(loading && ' animate-spin')} />
+        <Button variant="default" onClick={handleClick} disabled={isLoading}>
+            <RefreshCcw className={'h-4 w-4' + clsx(isLoading && ' animate-spin')} />
         </Button>
     );
 }
 
-export const RefreshTopArtistsButton = ({ setEndLoading }: { setEndLoading: (loading: boolean) => void }) => {
+export const RefreshTopArtistsButton = ({ setLoadingState }: { setLoadingState?: (value: LoadingStates) => void }) => {
     const { refreshUserTopItems } = useStorage();
     const handleRefresh = async () => {
         await refreshUserTopItems('artists', 50);
     };
-    return <RefreshButton onClick={handleRefresh} setEndLoading={setEndLoading} />;
+    return <RefreshButton onClick={handleRefresh} setLoadingState={setLoadingState} />;
 };
 
-export const RefreshTopTracksButton = ({ setEndLoading }: { setEndLoading: (loading: boolean) => void }) => {
+export const RefreshTopTracksButton = ({ setLoadingState }: { setLoadingState?: (value: LoadingStates) => void }) => {
     const { refreshUserTopItems } = useStorage();
     const handleRefresh = async () => {
         await refreshUserTopItems('tracks', 50);
     };
-    return <RefreshButton onClick={handleRefresh} setEndLoading={setEndLoading} />;
+    return <RefreshButton onClick={handleRefresh} setLoadingState={setLoadingState} />;
 };
 
-export const RefreshLikesButton = ({ setEndLoading }: { setEndLoading: (loading: boolean) => void }) => {
+export const RefreshLikesButton = ({ setLoadingState }: { setLoadingState?: (value: LoadingStates) => void }) => {
     const { refreshLikes } = useStorage();
     const handleRefresh = async () => {
         await refreshLikes();
     };
-    return <RefreshButton onClick={handleRefresh} setEndLoading={setEndLoading} />;
+    return <RefreshButton onClick={handleRefresh} setLoadingState={setLoadingState} />;
 };

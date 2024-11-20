@@ -19,6 +19,7 @@ import { Cover } from './ui/cover';
 import { Input } from '@/components/ui/input';
 import { RefreshLikesButton } from './refresh';
 import { Skeleton } from './ui/skeleton';
+import { LoadingStates } from '@/types/common';
 
 const columns: ColumnDef<SavedTrack>[] = [
     {
@@ -134,26 +135,32 @@ const fuzzyFilter: FilterFn<SavedTrack> = (row, _columnId, value: string) => {
 export function LikeTable() {
     const { getUserLikes } = useStorage();
     const [likes, setLikes] = useState<SavedTrack[] | null>(null);
-    const [endLoading, setEndLoading] = useState(false);
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [globalFilter, setGlobalFilter] = React.useState('');
+    const [loadingState, setLoadingState] = useState<LoadingStates>('idle');
 
     useEffect(() => {
         (async () => {
             if (likes) return;
-            setLikes(await getUserLikes());
+            setLoadingState('loading');
+            await getUserLikes().then((likes) => {
+                setLikes(likes);
+                setLoadingState('idle');
+            });
         })();
     }, [getUserLikes, likes]);
 
     useEffect(() => {
-        console.log('endLoading', endLoading);
         (async () => {
-            if (likes && !endLoading) return;
-            const newLikes = await getUserLikes();
-            setLikes(newLikes);
-            setEndLoading(false);
+            if (loadingState === 'loading') setLikes(null);
+            else if (loadingState === 'end') {
+                await getUserLikes().then((likes) => {
+                    setLikes(likes);
+                    setLoadingState('idle');
+                });
+            } else if (loadingState === 'idle') return;
         })();
-    }, [getUserLikes, endLoading, likes]);
+    }, [loadingState, getUserLikes]);
 
     const table = useReactTable({
         data: likes || [],
@@ -179,7 +186,7 @@ export function LikeTable() {
                     onChange={(e) => setGlobalFilter(e.target.value)}
                     className="w-full"
                 />
-                <RefreshLikesButton setEndLoading={setEndLoading} />
+                <RefreshLikesButton setLoadingState={setLoadingState} />
             </div>
             <div className="rounded-md border">
                 <Table>
@@ -197,7 +204,15 @@ export function LikeTable() {
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {loadingState == 'loading' ? (
+                            Array.from({ length: 20 }).map((_, index) => (
+                                <TableRow key={index}>
+                                    <TableCell colSpan={columns.length}>
+                                        <Skeleton className={'w-full h-10'} />
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id}>
                                     {row.getVisibleCells().map((cell) => (
@@ -208,23 +223,11 @@ export function LikeTable() {
                                 </TableRow>
                             ))
                         ) : (
-                            <>
-                                {likes ? (
-                                    <TableRow>
-                                        <TableCell colSpan={columns.length} className="h-24 text-center">
-                                            No results found
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    Array.from({ length: 20 }).map((_, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell colSpan={columns.length}>
-                                                <Skeleton className={'w-full h-10'} />
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </>
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                    No results found
+                                </TableCell>
+                            </TableRow>
                         )}
                     </TableBody>
                 </Table>
