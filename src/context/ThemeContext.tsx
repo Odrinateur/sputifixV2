@@ -13,7 +13,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
     useEffect(() => {
         document.body.className = '';
-        document.body.classList.add(theme);
+        if (theme.includes(' ')) {
+            const themes = theme.split(' ');
+            themes.forEach((t) => document.body.classList.add(t));
+        } else document.body.classList.add(theme);
     }, [theme]);
 
     return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
