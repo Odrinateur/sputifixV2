@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { Link } from 'react-router-dom';
-import { House, Settings, TrendingUp } from 'lucide-react';
+import { Heart, House, Settings, TrendingUp } from 'lucide-react';
 
 export function Navbar() {
     return (
@@ -14,6 +14,10 @@ export function Navbar() {
                 <Button variant="link" className={'text-2xl'}>
                     <House className={'!w-6 !h-6'} />
                     <Link to={'/'}>Home</Link>
+                </Button>
+                <Button variant="link" className={'text-2xl'}>
+                    <Heart className={'!w-6 !h-6'} />
+                    <Link to={'/likes'}>Likes</Link>
                 </Button>
                 <Button variant="link" className={'text-2xl'}>
                     <Settings className={'!w-6 !h-6'} />
