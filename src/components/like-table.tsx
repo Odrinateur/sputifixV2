@@ -172,12 +172,12 @@ export function LikeTable() {
 
     return (
         <div className="w-full space-y-4">
-            <div className={'flex justify-between items-center'}>
+            <div className={'flex items-center gap-4'}>
                 <Input
                     placeholder="Search tracks, artists or albums..."
                     value={globalFilter}
                     onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="max-w-sm"
+                    className="w-full"
                 />
                 <RefreshLikesButton setEndLoading={setEndLoading} />
             </div>
