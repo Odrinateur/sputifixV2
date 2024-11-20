@@ -8,7 +8,7 @@ export function Navbar() {
         <nav className={'w-full lg:w-1/5 flex flex-col gap-10 justify-start'}>
             <Card
                 className={
-                    'w-full flex flex-col sm:flex-row lg:flex-col p-4 gap-2 justify-start sm:justify-center lg:justify-start'
+                    'w-full flex flex-col grid-cols-none sm:grid sm:grid-cols-2 lg:flex-col lg:grid-cols-none py-4 gap-2 justify-start sm:justify-center lg:justify-center'
                 }
             >
                 <Button variant="link" className={'text-2xl'}>
