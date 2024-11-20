@@ -31,7 +31,7 @@ export function UserCard() {
                 ) : (
                     <Skeleton className={'w-2/5 h-full'} />
                 )}
-                <div className={'w-3/5 h-full p-2 flex flex-col items-start gap-1'}>
+                <div className={'w-3/5 h-full p-2 flex flex-col items-start gap-4'}>
                     {user ? (
                         <>
                             <H1 className={'flex justify-center items-center gap-4'}>
