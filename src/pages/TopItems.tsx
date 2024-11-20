@@ -4,7 +4,7 @@ import { TopArtists } from '@/components/top-items/top-artists';
 export function TopArtistsPage() {
     return (
         <MainContainerWithNav>
-            <TopArtists isHome />
+            <TopArtists isHome={false} />
         </MainContainerWithNav>
     );
 }
@@ -12,7 +12,7 @@ export function TopArtistsPage() {
 export function TopTracksPage() {
     return (
         <MainContainerWithNav>
-            <TopArtists isHome />
+            <TopArtists isHome={false} />
         </MainContainerWithNav>
     );
 }
