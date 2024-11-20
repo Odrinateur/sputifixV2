@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 import { SquareArrowOutUpRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Artist, Track } from '@spotify/web-api-ts-sdk';
+import { H3 } from '../ui/typography';
 
 export function TopItems<T extends Artist | Track>({
     isHome = true,
@@ -48,17 +49,17 @@ export function TopItems<T extends Artist | Track>({
     return (
         <Card className={'w-full'}>
             <CardHeader>
-                <CardTitle className={'flex justify-between items-center'}>
+                <CardTitle className={'flex justify-center sm:justify-between items-center'}>
                     {isHome ? (
                         <Link
                             to={`/top/${itemType.toLowerCase()}`}
-                            className={'flex justify-center items-center gap-2'}
+                            className={'hidden sm:flex justify-center items-center gap-2'}
                         >
                             {title}
                             <SquareArrowOutUpRight size={20} strokeWidth={3.2} />
                         </Link>
                     ) : (
-                        title
+                        <H3 className={'hidden sm:block'}>{title}</H3>
                     )}
                     <div className={'flex justify-center items-center gap-2'}>
                         <Select
@@ -72,8 +73,8 @@ export function TopItems<T extends Artist | Track>({
                                 {timeRange === 'short_term'
                                     ? '4 weeks'
                                     : timeRange === 'medium_term'
-                                      ? '6 months'
-                                      : '1 year'}
+                                    ? '6 months'
+                                    : '1 year'}
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="short_term">4 weeks</SelectItem>
