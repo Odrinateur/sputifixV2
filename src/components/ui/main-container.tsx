@@ -23,7 +23,7 @@ function MainContainer({ children, withNav, className }: MainContainerProps) {
 
 function MainContainerWithNav({ children }: MainContainerProps) {
     return (
-        <MainContainer className={'gap-5'} withNav>
+        <MainContainer className={'gap-10'} withNav>
             <div className={'flex flex-col gap-10 w-full lg:w-4/5 h-full overflow-y-auto'}>{children}</div>
             <Navbar />
         </MainContainer>
