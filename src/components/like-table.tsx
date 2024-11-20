@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Cover } from './ui/cover';
 import { Input } from '@/components/ui/input';
 import { RefreshLikesButton } from './refresh';
+import { Skeleton } from './ui/skeleton';
 
 const columns: ColumnDef<SavedTrack>[] = [
     {
@@ -207,11 +208,23 @@ export function LikeTable() {
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow>
-                                <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    {likes ? 'No results found' : 'Loading...'}
-                                </TableCell>
-                            </TableRow>
+                            <>
+                                {likes ? (
+                                    <TableRow>
+                                        <TableCell colSpan={columns.length} className="h-24 text-center">
+                                            No results found
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    Array.from({ length: 20 }).map((_, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell colSpan={columns.length}>
+                                                <Skeleton className={'w-full h-10'} />
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
+                            </>
                         )}
                     </TableBody>
                 </Table>
