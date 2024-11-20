@@ -13,6 +13,9 @@ type StorageContextType = {
         timeRange?: TimeRangeType
     ): Promise<T[] | null>;
     getUserLikes(): Promise<SavedTrack[] | null>;
+
+    refreshUserTopItems(type: TopItemsType, limit?: number, timeRange?: TimeRangeType): void;
+    refreshLikes(): void;
 };
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
@@ -96,11 +99,11 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         return user ?? null;
     };
 
-    async function getUserTopItems<T extends Artist | Track>(
+    const getUserTopItems = async <T extends Artist | Track>(
         type: 'artists' | 'tracks',
         limit: number,
         timeRange: TimeRangeType = 'medium_term'
-    ): Promise<T[] | null> {
+    ): Promise<T[] | null> => {
         const topItemsInStorage = getItem(`top_${type}`, timeRange);
         if (topItemsInStorage && topItemsInStorage.lastUpdated + 3600 * 1000 > Date.now()) {
             const topItems = JSON.parse(topItemsInStorage.value);
@@ -120,9 +123,9 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
 
         setItem(`top_${type}`, JSON.stringify(topItems), timeRange);
         return topItems.length > 0 ? topItems : null;
-    }
+    };
 
-    async function getUserLikes(): Promise<SavedTrack[] | null> {
+    const getUserLikes = async (): Promise<SavedTrack[] | null> => {
         const likesInStorage = getItem('likes');
         if (likesInStorage && likesInStorage.lastUpdated + 3600 * 1000 > Date.now())
             return JSON.parse(likesInStorage.value);
@@ -130,14 +133,41 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         const likes = [];
         let response = await sdk.currentUser.tracks.savedTracks(50, 0);
         likes.push(...response.items);
+
         while (response.next) {
-            const next = response.next;
-            response = await sdk.makeRequest('GET', next);
+            response = await sdk.makeRequest('GET', response.next.replace('https://api.spotify.com/v1/', ''));
             likes.push(...response.items);
         }
-        setItem('likes', JSON.stringify(likes), 'likes');
+        setItem('likes', JSON.stringify(likes));
         return likes ?? null;
-    }
+    };
+
+    const resetLastUpdated = (key: string, secondKey?: string) => {
+        const storage = secureLocalStorage.getItem('storage');
+        if (storage && typeof storage === 'string') {
+            const storageJson = JSON.parse(storage);
+            if (secondKey) {
+                storageJson[key] = storageJson[key] || {};
+                storageJson[key][secondKey].lastUpdated = 0;
+            } else storageJson[key].lastUpdated = 0;
+            secureLocalStorage.setItem('storage', JSON.stringify(storageJson));
+        }
+    };
+
+    const refreshUserTopItems = async (
+        type: TopItemsType,
+        limit: number = 0,
+        timeRange: TimeRangeType = 'medium_term'
+    ) => {
+        if (limit === 0) limit = getSettings('top_items', 'limit') as number;
+        resetLastUpdated(`top_${type}`, timeRange);
+        await getUserTopItems(type, limit, timeRange);
+    };
+
+    const refreshLikes = async () => {
+        resetLastUpdated('likes');
+        await getUserLikes();
+    };
 
     const storage = {
         getSettings,
@@ -145,6 +175,9 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         getUser,
         getUserTopItems,
         getUserLikes,
+
+        refreshUserTopItems,
+        refreshLikes,
     };
 
     return <StorageContext.Provider value={storage}>{children}</StorageContext.Provider>;
