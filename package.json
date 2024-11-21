@@ -11,6 +11,7 @@
         "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,md,json}\""
     },
     "dependencies": {
+        "@radix-ui/react-checkbox": "^1.1.2",
         "@radix-ui/react-select": "^2.1.2",
         "@radix-ui/react-slot": "^1.1.0",
         "@spotify/web-api-ts-sdk": "^1.2.0",
