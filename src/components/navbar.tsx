@@ -7,41 +7,51 @@ import { H3 } from './ui/typography';
 export function Navbar() {
     return (
         <nav className={'w-full lg:h-full lg:w-1/5 flex flex-col gap-5 justify-start lg:flex-1'}>
-            <Card
-                className={
-                    'w-full flex flex-col grid-cols-none sm:grid sm:grid-cols-2 lg:flex-col lg:grid-cols-none py-4 gap-2 justify-start sm:justify-center lg:justify-center'
-                }
-            >
-                <Button variant="link" className={'text-2xl'}>
-                    <House className={'!w-6 !h-6'} />
-                    <Link to={'/'}>Home</Link>
-                </Button>
-                <Button variant="link" className={'text-2xl'}>
-                    <Heart className={'!w-6 !h-6'} />
-                    <Link to={'/likes'}>Likes</Link>
-                </Button>
-                <Button variant="link" className={'text-2xl'}>
-                    <ListMusic className={'!w-6 !h-6'} />
-                    <Link to={'/playlists'}>Playlists</Link>
-                </Button>
-                <Button variant="link" className={'text-2xl'}>
-                    <TrendingUp className={'!w-6 !h-6'} />
-                    <Link to={'/top/artists'}>Top Artists</Link>
-                </Button>
-                <Button variant="link" className={'text-2xl'}>
-                    <TrendingUp className={'!w-6 !h-6'} />
-                    <Link to={'/top/tracks'}>Top Tracks</Link>
-                </Button>
+            <Card className={'w-full flex lg:flex-col py-4 gap-2 justify-center'}>
+                <NavBarLinkWithIcon to={'/'} icon={<House className={'!w-6 !h-6'} />} text={'Home'} />
+                <NavBarLinkWithIcon to={'/likes'} icon={<Heart className={'!w-6 !h-6'} />} text={'Likes'} />
+                <NavBarLinkWithIcon to={'/playlists'} icon={<ListMusic className={'!w-6 !h-6'} />} text={'Playlists'} />
+                <NavBarLinkWithIcon
+                    to={'/top/artists'}
+                    icon={<TrendingUp className={'!w-6 !h-6'} />}
+                    text={'Top Artists'}
+                />
+                <NavBarLinkWithIcon
+                    to={'/top/tracks'}
+                    icon={<TrendingUp className={'!w-6 !h-6'} />}
+                    text={'Top Tracks'}
+                />
             </Card>
             <Card className={'w-full hidden lg:flex flex-col py-4 gap-2 items-center'}>
                 <H3>Stats.fm</H3>
             </Card>
             <Card className={'w-full flex py-2 justify-center items-start lg:mt-auto'}>
-                <Button variant="link" className={'text-2xl'}>
-                    <Settings className={'!w-6 !h-6'} />
-                    <Link to={'/settings'}>Settings</Link>
-                </Button>
+                <NavBarLinkWithIcon
+                    to={'/settings'}
+                    icon={<Settings className={'!w-6 !h-6'} />}
+                    text={'Settings'}
+                    isTextHidden={false}
+                />
             </Card>
         </nav>
     );
 }
+
+const NavBarLinkWithIcon = ({
+    to,
+    icon,
+    text,
+    isTextHidden = true,
+}: {
+    to: string;
+    icon: React.ReactNode;
+    text: string;
+    isTextHidden?: boolean;
+}) => (
+    <Button variant="link" className={'text-2xl'}>
+        <Link to={to} className={'w-full flex justify-center items-center gap-2'}>
+            {icon}
+            <H3 className={isTextHidden ? 'hidden lg:block' : ''}>{text}</H3>
+        </Link>
+    </Button>
+);
