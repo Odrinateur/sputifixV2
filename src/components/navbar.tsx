@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { Link } from 'react-router-dom';
-import { Heart, House, ListMusic, Settings, TrendingUp } from 'lucide-react';
+import { AudioLines, ChartBar, Heart, House, ListMusic, Settings, Users } from 'lucide-react';
 import { H3 } from './ui/typography';
 
 export function Navbar() {
@@ -11,19 +11,18 @@ export function Navbar() {
                 <NavBarLinkWithIcon to={'/'} icon={<House className={'!w-6 !h-6'} />} text={'Home'} />
                 <NavBarLinkWithIcon to={'/likes'} icon={<Heart className={'!w-6 !h-6'} />} text={'Likes'} />
                 <NavBarLinkWithIcon to={'/playlists'} icon={<ListMusic className={'!w-6 !h-6'} />} text={'Playlists'} />
-                <NavBarLinkWithIcon
-                    to={'/top/artists'}
-                    icon={<TrendingUp className={'!w-6 !h-6'} />}
-                    text={'Top Artists'}
-                />
+                <NavBarLinkWithIcon to={'/top/artists'} icon={<Users className={'!w-6 !h-6'} />} text={'Top Artists'} />
                 <NavBarLinkWithIcon
                     to={'/top/tracks'}
-                    icon={<TrendingUp className={'!w-6 !h-6'} />}
+                    icon={<AudioLines className={'!w-6 !h-6'} />}
                     text={'Top Tracks'}
                 />
             </Card>
             <Card className={'w-full hidden lg:flex flex-col py-4 gap-2 items-center'}>
-                <H3>Stats.fm</H3>
+                <H3 className={'flex items-center gap-2'}>
+                    <ChartBar className={'!w-6 !h-6'} />
+                    Stats.fm
+                </H3>
             </Card>
             <Card className={'w-full flex py-2 justify-center items-start lg:mt-auto'}>
                 <NavBarLinkWithIcon
