@@ -52,3 +52,11 @@ export const RefreshLikesButton = ({ setLoadingState }: { setLoadingState?: (val
     };
     return <RefreshButton onClick={handleRefresh} setLoadingState={setLoadingState} />;
 };
+
+export const RefreshPlaylistsButton = ({ setLoadingState }: { setLoadingState?: (value: LoadingStates) => void }) => {
+    const { refreshPlaylists } = useStorage();
+    const handleRefresh = async () => {
+        await refreshPlaylists();
+    };
+    return <RefreshButton onClick={handleRefresh} setLoadingState={setLoadingState} />;
+};

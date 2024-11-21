@@ -1,4 +1,4 @@
-import type { Artist, Playlist, Track } from '@spotify/web-api-ts-sdk';
+import type { Artist, SimplifiedPlaylist, Track } from '@spotify/web-api-ts-sdk';
 import { CardContent } from '@/components/ui/card.tsx';
 import {
     ArtistCard,
@@ -33,7 +33,7 @@ export const ArtistsGrid = ({ items }: { items: Artist[] | null }) => (
     />
 );
 
-export const PlaylistsGrid = ({ items }: { items: Playlist[] | null }) => (
+export const PlaylistsGrid = ({ items }: { items: SimplifiedPlaylist[] | null }) => (
     <ItemsGrid
         items={items}
         ItemComponent={({ item }) => <PlaylistCard playlist={item} />}

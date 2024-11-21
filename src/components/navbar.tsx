@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { Link } from 'react-router-dom';
-import { Heart, House, Settings, TrendingUp } from 'lucide-react';
+import { Heart, House, ListMusic, Settings, TrendingUp } from 'lucide-react';
 import { H3 } from './ui/typography';
 
 export function Navbar() {
@@ -19,6 +19,10 @@ export function Navbar() {
                 <Button variant="link" className={'text-2xl'}>
                     <Heart className={'!w-6 !h-6'} />
                     <Link to={'/likes'}>Likes</Link>
+                </Button>
+                <Button variant="link" className={'text-2xl'}>
+                    <ListMusic className={'!w-6 !h-6'} />
+                    <Link to={'/playlists'}>Playlists</Link>
                 </Button>
                 <Button variant="link" className={'text-2xl'}>
                     <TrendingUp className={'!w-6 !h-6'} />
