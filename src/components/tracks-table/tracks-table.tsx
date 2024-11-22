@@ -1,5 +1,4 @@
-import { useStorage } from '@/context/StorageContext';
-import { SavedTrack } from '@spotify/web-api-ts-sdk';
+import { Track } from '@spotify/web-api-ts-sdk';
 import { useEffect, useState } from 'react';
 import * as React from 'react';
 import {
@@ -15,13 +14,12 @@ import {
 import { ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Cover } from './ui/cover';
+import { Cover } from '../ui/cover';
 import { Input } from '@/components/ui/input';
-import { RefreshLikesButton } from './refresh';
-import { Skeleton } from './ui/skeleton';
+import { Skeleton } from '../ui/skeleton';
 import { LoadingStates } from '@/types/common';
 
-const columns: ColumnDef<SavedTrack>[] = [
+const columns: ColumnDef<Track>[] = [
     {
         id: 'index',
         accessorFn: (_, index) => index,
@@ -36,13 +34,13 @@ const columns: ColumnDef<SavedTrack>[] = [
         cell: ({ row }) => (
             <div className="flex justify-start items-center gap-4">
                 {row.index + 1}
-                <Cover coverType="track" images={row.original.track.album.images} className={'!w-8 !h-8 rounded-sm'} />
+                <Cover coverType="track" images={row.original.album.images} className={'!w-8 !h-8 rounded-sm'} />
             </div>
         ),
     },
     {
         id: 'titleAndArtists',
-        accessorFn: (row) => `${row.track.name} - ${row.track.artists.map((a) => a.name).join(', ')}`,
+        accessorFn: (row) => `${row.name} - ${row.artists.map((a) => a.name).join(', ')}`,
         header: ({ column }) => {
             return (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
@@ -54,15 +52,15 @@ const columns: ColumnDef<SavedTrack>[] = [
         cell: ({ row }) => (
             <div className="max-w-[500px] truncate flex gap-1 flex-wrap">
                 <a
-                    href={row.original.track.external_urls.spotify}
+                    href={row.original.external_urls.spotify}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:underline"
                 >
-                    {row.original.track.name}
+                    {row.original.name}
                 </a>
                 {' - '}
-                {row.original.track.artists.map((artist, idx) => (
+                {row.original.artists.map((artist, idx) => (
                     <React.Fragment key={artist.id}>
                         <a
                             href={artist.external_urls.spotify}
@@ -72,7 +70,7 @@ const columns: ColumnDef<SavedTrack>[] = [
                         >
                             {artist.name}
                         </a>
-                        {idx < row.original.track.artists.length - 1 ? ', ' : ''}
+                        {idx < row.original.artists.length - 1 ? ', ' : ''}
                     </React.Fragment>
                 ))}
             </div>
@@ -80,7 +78,7 @@ const columns: ColumnDef<SavedTrack>[] = [
     },
     {
         id: 'album',
-        accessorFn: (row) => row.track.album.name,
+        accessorFn: (row) => row.album.name,
         header: ({ column }) => {
             return (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
@@ -92,19 +90,19 @@ const columns: ColumnDef<SavedTrack>[] = [
         cell: ({ row }) => (
             <div className="max-w-[200px] truncate">
                 <a
-                    href={row.original.track.album.external_urls.spotify}
+                    href={row.original.album.external_urls.spotify}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:underline"
                 >
-                    {row.original.track.album.name}
+                    {row.original.album.name}
                 </a>
             </div>
         ),
     },
     {
         id: 'duration_ms',
-        accessorFn: (row) => row.track.duration_ms,
+        accessorFn: (row) => row.duration_ms,
         header: ({ column }) => {
             return (
                 <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
@@ -122,9 +120,9 @@ const columns: ColumnDef<SavedTrack>[] = [
     },
 ];
 
-const fuzzyFilter: FilterFn<SavedTrack> = (row, _columnId, value: string) => {
+const fuzzyFilter: FilterFn<Track> = (row, _columnId, value: string) => {
     const searchValue = value.toLowerCase();
-    const track = row.original.track;
+    const track = row.original;
     return (
         track.name.toLowerCase().includes(searchValue) ||
         track.artists.some((artist) => artist.name.toLowerCase().includes(searchValue)) ||
@@ -132,38 +130,37 @@ const fuzzyFilter: FilterFn<SavedTrack> = (row, _columnId, value: string) => {
     );
 };
 
-export function LikeTable() {
-    const { getUserLikes } = useStorage();
-    const [likes, setLikes] = useState<SavedTrack[] | null>(null);
+export function TracksTable({
+    tracks,
+    RefreshButton,
+    id,
+}: {
+    tracks: Track[] | null;
+    RefreshButton: React.ComponentType<{ id?: string; setLoadingState: (state: LoadingStates) => void }>;
+    id?: string;
+}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [globalFilter, setGlobalFilter] = React.useState('');
     const [loadingState, setLoadingState] = useState<LoadingStates>('idle');
+    const [currentTracks, setCurrentTracks] = useState<Track[] | null>(null);
 
     useEffect(() => {
         (async () => {
-            if (likes) return;
-            setLoadingState('loading');
-            await getUserLikes().then((likes) => {
-                setLikes(likes);
-                setLoadingState('idle');
-            });
+            if (tracks) setLoadingState('end');
+            else setLoadingState('loading');
         })();
-    }, [getUserLikes, likes]);
+    }, [tracks]);
 
     useEffect(() => {
         (async () => {
-            if (loadingState === 'loading') setLikes(null);
-            else if (loadingState === 'end') {
-                await getUserLikes().then((likes) => {
-                    setLikes(likes);
-                    setLoadingState('idle');
-                });
-            } else if (loadingState === 'idle') return;
+            if (loadingState === 'loading') setCurrentTracks(null);
+            else if (loadingState === 'end') setCurrentTracks(tracks);
+            else if (loadingState === 'idle') return;
         })();
-    }, [loadingState, getUserLikes]);
+    }, [loadingState, tracks]);
 
     const table = useReactTable({
-        data: likes || [],
+        data: currentTracks || [],
         columns,
         getCoreRowModel: getCoreRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -186,7 +183,7 @@ export function LikeTable() {
                     onChange={(e) => setGlobalFilter(e.target.value)}
                     className="w-full"
                 />
-                <RefreshLikesButton setLoadingState={setLoadingState} />
+                <RefreshButton id={id} setLoadingState={setLoadingState} />
             </div>
             <div className="rounded-md border">
                 <Table>
