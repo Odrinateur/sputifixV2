@@ -11,7 +11,7 @@ interface CoverProps {
 
 export function Cover({ images, coverType, className }: CoverProps) {
     if (!images || images.length === 0) {
-        className = className ? `${className} w-full h-full` : 'w-full h-full';
+        className = className ? `${className} w-1/5 h-full` : 'w-1/5 h-full';
         switch (coverType) {
             case 'album':
                 return AlbumCover(className);
