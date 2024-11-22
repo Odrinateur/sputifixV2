@@ -26,7 +26,7 @@ export function UserCard() {
                     <Cover
                         images={user.images}
                         coverType={'user'}
-                        className={'w-2/5 h-full rounded-xl self-center sm:items-start'}
+                        className={'rounded-xl self-center sm:items-start'}
                     />
                 ) : (
                     <Skeleton className={'w-2/5 h-full'} />
