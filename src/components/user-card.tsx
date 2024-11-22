@@ -20,14 +20,10 @@ export function UserCard() {
     }, [getUser, user]);
 
     return (
-        <Card className={'w-full md:h-2/5'}>
-            <CardContent className={'w-full h-max p-4 flex flex-col sm:flex-row justify-start gap-4'}>
+        <Card className={'w-full h-2/5'}>
+            <CardContent className={'w-full h-full p-4 flex flex-col sm:flex-row justify-start gap-4'}>
                 {user ? (
-                    <Cover
-                        images={user.images}
-                        coverType={'user'}
-                        className={'rounded-xl self-center sm:items-start'}
-                    />
+                    <Cover images={user.images} coverType={'user'} className={'rounded-xl'} />
                 ) : (
                     <Skeleton className={'w-2/5 h-full'} />
                 )}

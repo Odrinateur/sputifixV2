@@ -11,7 +11,6 @@ interface CoverProps {
 
 export function Cover({ images, coverType, className }: CoverProps) {
     if (!images || images.length === 0) {
-        className = className ? `${className} w-1/5 h-full` : 'w-1/5 h-full';
         switch (coverType) {
             case 'album':
                 return AlbumCover(className);
@@ -34,6 +33,8 @@ export function Cover({ images, coverType, className }: CoverProps) {
         return prev;
     });
     const image = bestImage.url;
+
+    if (coverType != 'user') className = `${className} h-max aspect-square`;
 
     return <img src={image} alt={`${coverType} cover`} className={`object-cover ${className}`} />;
 }
