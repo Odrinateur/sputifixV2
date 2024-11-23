@@ -9,13 +9,13 @@ import {
 } from '@/types/common.ts';
 import { useStorage } from '@/context/StorageContext';
 import { useEffect, useState } from 'react';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { SquareArrowOutUpRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Artist, Track } from '@spotify/web-api-ts-sdk';
-import { H3 } from '../ui/typography';
 import { RefreshTopArtistsButton, RefreshTopTracksButton } from '../refresh';
+import { H1 } from '../ui/typography';
 
 export function TopItems<T extends Artist | Track>({
     isHome = true,
@@ -66,72 +66,71 @@ export function TopItems<T extends Artist | Track>({
     }, [loadingState, getUserTopItems, itemType, limit, timeRange]);
 
     return (
-        <Card className={'w-full'}>
-            <CardHeader>
-                <CardTitle className={'flex justify-center sm:justify-between items-center'}>
-                    {isHome ? (
-                        <Link
-                            to={`/top/${itemType.toLowerCase()}`}
-                            className={'hidden sm:flex justify-center items-center gap-2'}
-                        >
-                            {title}
-                            <SquareArrowOutUpRight size={20} strokeWidth={3.2} />
-                        </Link>
-                    ) : (
-                        <H3 className={'hidden sm:block'}>{title}</H3>
-                    )}
-                    <div className={'flex justify-center items-center gap-2'}>
-                        <Select
-                            onValueChange={(value) => {
-                                setTimeRange(value as TimeRangeType);
-                                setItems(null);
-                            }}
-                            defaultValue={timeRange}
-                        >
-                            <SelectTrigger className={'w-40'}>
-                                {timeRange === 'short_term'
-                                    ? '4 weeks'
-                                    : timeRange === 'medium_term'
-                                    ? '6 months'
-                                    : '1 year'}
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="short_term">4 weeks</SelectItem>
-                                <SelectItem value="medium_term">6 months</SelectItem>
-                                <SelectItem value="long_term">1 year</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <Select
-                            onValueChange={(value) => {
-                                setLimit(parseInt(value) as HomeDisplayLimitType | TopDisplayLimit);
-                                setItems(null);
-                            }}
-                            defaultValue={limit.toString()}
-                        >
-                            <SelectTrigger className={'w-20'}>{limit}</SelectTrigger>
-                            <SelectContent>
-                                {isHome
-                                    ? HomeDisplayLimits.map((limit) => (
-                                          <SelectItem key={limit} value={limit.toString()}>
-                                              {limit}
-                                          </SelectItem>
-                                      ))
-                                    : TopDisplayLimits.map((limit) => (
-                                          <SelectItem key={limit} value={limit.toString()}>
-                                              {limit}
-                                          </SelectItem>
-                                      ))}
-                            </SelectContent>
-                        </Select>
-                        {!isHome && itemType === 'artists' ? (
-                            <RefreshTopArtistsButton setLoadingState={setLoadingState} />
-                        ) : !isHome && itemType === 'tracks' ? (
-                            <RefreshTopTracksButton setLoadingState={setLoadingState} />
-                        ) : null}
-                    </div>
-                </CardTitle>
-            </CardHeader>
-            <GridComponent items={loadingState == 'loading' ? null : items} />
-        </Card>
+        <div className={'w-full flex flex-col gap-4'}>
+            {!isHome && <H1>{title} </H1>}
+            <div className={`w-full flex justify-end ${isHome ?? 'sm:justify-between'} items-center`}>
+                {isHome ?? (
+                    <Link
+                        to={`/top/${itemType.toLowerCase()}`}
+                        className={'hidden sm:flex justify-center items-center gap-2'}
+                    >
+                        {title}
+                        <SquareArrowOutUpRight size={20} strokeWidth={3.2} />
+                    </Link>
+                )}
+                <div className={'flex justify-center items-center gap-2'}>
+                    <Select
+                        onValueChange={(value) => {
+                            setTimeRange(value as TimeRangeType);
+                            setItems(null);
+                        }}
+                        defaultValue={timeRange}
+                    >
+                        <SelectTrigger className={'w-40'}>
+                            {timeRange === 'short_term'
+                                ? '4 weeks'
+                                : timeRange === 'medium_term'
+                                ? '6 months'
+                                : '1 year'}
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="short_term">4 weeks</SelectItem>
+                            <SelectItem value="medium_term">6 months</SelectItem>
+                            <SelectItem value="long_term">1 year</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Select
+                        onValueChange={(value) => {
+                            setLimit(parseInt(value) as HomeDisplayLimitType | TopDisplayLimit);
+                            setItems(null);
+                        }}
+                        defaultValue={limit.toString()}
+                    >
+                        <SelectTrigger className={'w-20'}>{limit}</SelectTrigger>
+                        <SelectContent>
+                            {isHome
+                                ? HomeDisplayLimits.map((limit) => (
+                                      <SelectItem key={limit} value={limit.toString()}>
+                                          {limit}
+                                      </SelectItem>
+                                  ))
+                                : TopDisplayLimits.map((limit) => (
+                                      <SelectItem key={limit} value={limit.toString()}>
+                                          {limit}
+                                      </SelectItem>
+                                  ))}
+                        </SelectContent>
+                    </Select>
+                    {!isHome && itemType === 'artists' ? (
+                        <RefreshTopArtistsButton setLoadingState={setLoadingState} />
+                    ) : !isHome && itemType === 'tracks' ? (
+                        <RefreshTopTracksButton setLoadingState={setLoadingState} />
+                    ) : null}
+                </div>
+            </div>
+            <Card className={'w-full'}>
+                <GridComponent items={loadingState == 'loading' ? null : items} />
+            </Card>
+        </div>
     );
 }
