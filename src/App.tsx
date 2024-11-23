@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { ThemeProvider } from '@/context/ThemeContext';
 import { Home } from '@/pages/Home.tsx';
 import { Settings } from '@/pages/Settings';
 import { useSpotify } from '@/hooks/useSpotify.ts';
@@ -17,19 +16,17 @@ export default function App() {
 
     return sdk ? (
         <StorageProvider sdk={sdk}>
-            <ThemeProvider>
-                <Router>
-                    <Routes>
-                        <Route path="/" element={<Home />} />
-                        <Route path="/likes" element={<Likes />} />
-                        <Route path="/playlists" element={<PlaylistsPage />} />
-                        <Route path="/playlist/:id" element={<PlaylistPage />} />
-                        <Route path="/top/artists" element={<TopArtistsPage />} />
-                        <Route path="/top/tracks" element={<TopTracksPage />} />
-                        <Route path="/settings" element={<Settings />} />
-                    </Routes>
-                </Router>
-            </ThemeProvider>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/likes" element={<Likes />} />
+                    <Route path="/playlists" element={<PlaylistsPage />} />
+                    <Route path="/playlist/:id" element={<PlaylistPage />} />
+                    <Route path="/top/artists" element={<TopArtistsPage />} />
+                    <Route path="/top/tracks" element={<TopTracksPage />} />
+                    <Route path="/settings" element={<Settings />} />
+                </Routes>
+            </Router>
         </StorageProvider>
     ) : (
         <></>
