@@ -76,11 +76,11 @@ export function TopItems<T extends Artist | Track>({
     return (
         <div className={'w-full flex flex-col gap-4'}>
             {!isHome && <H1>{title} </H1>}
-            <div className={`w-full flex justify-end ${isHome ?? 'sm:justify-between'} items-center`}>
-                {isHome ?? (
+            <div className={`w-full flex justify-end ${isHome && 'sm:justify-between'} items-center`}>
+                {isHome && (
                     <Link
                         to={`/top/${itemType.toLowerCase()}`}
-                        className={'hidden sm:flex justify-center items-center gap-2'}
+                        className={'hidden sm:flex justify-center items-center gap-2 text-2xl'}
                     >
                         {title}
                         <SquareArrowOutUpRight size={20} strokeWidth={3.2} />
