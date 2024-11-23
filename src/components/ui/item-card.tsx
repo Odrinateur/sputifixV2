@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 import { Cover } from '@/components/ui/cover.tsx';
 import { H3, H4 } from '@/components/ui/typography.tsx';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
+import { Link } from 'react-router-dom';
 
 function Container({
     children,
@@ -39,11 +40,13 @@ function ArtistCard({ artist }: { artist: Artist }) {
 
 function PlaylistCard({ playlist }: { playlist: SimplifiedPlaylist }) {
     return (
-        <Container>
-            <Cover images={playlist.images} coverType={'playlist'} className={'w-full aspect-square rounded-lg'} />
-            <H3>{playlist.name}</H3>
-            <H4>{playlist.owner.display_name}</H4>
-        </Container>
+        <Link to={`/playlist/${playlist.id}`}>
+            <Container>
+                <Cover images={playlist.images} coverType={'playlist'} className={'w-full aspect-square rounded-lg'} />
+                <H3>{playlist.name}</H3>
+                <H4>{playlist.owner.display_name}</H4>
+            </Container>
+        </Link>
     );
 }
 
