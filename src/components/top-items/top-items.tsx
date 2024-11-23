@@ -32,15 +32,23 @@ export function TopItems<T extends Artist | Track>({
     const [items, setItems] = useState<T[] | null>(null);
 
     const [limit, setLimit] = useState<HomeDisplayLimitType | TopDisplayLimit>(
-        isHome
-            ? (parseInt(getSettings('home', 'limit')) as HomeDisplayLimitType)
-            : (parseInt(getSettings('top_items', 'limit')) as TopDisplayLimit)
+        isHome ? HomeDisplayLimits[0] : TopDisplayLimits[0]
     );
-    const [timeRange, setTimeRange] = useState<TimeRangeType>(
-        isHome
-            ? (getSettings('home', 'timeRange') as TimeRangeType)
-            : (getSettings('top_items', 'timeRange') as TimeRangeType)
-    );
+    const [timeRange, setTimeRange] = useState<TimeRangeType>('medium_term');
+
+    useEffect(() => {
+        (async () => {
+            const settingsLimit = isHome
+                ? (parseInt(await getSettings('home', 'limit')) as HomeDisplayLimitType)
+                : (parseInt(await getSettings('top_items', 'limit')) as TopDisplayLimit);
+            const settingsTimeRange = isHome
+                ? ((await getSettings('home', 'timeRange')) as TimeRangeType)
+                : ((await getSettings('top_items', 'timeRange')) as TimeRangeType);
+
+            setLimit(settingsLimit);
+            setTimeRange(settingsTimeRange);
+        })();
+    }, [isHome, getSettings]);
 
     const [loadingState, setLoadingState] = useState<LoadingStates>('idle');
 

@@ -1,23 +1,23 @@
-import React from 'react';
-import { useTheme } from '@/context/ThemeContext';
-import { ThemeType } from '@/types/common';
+// import React from 'react';
+// import { useTheme } from '@/context/ThemeContext';
+// import { ThemeType } from '@/types/common';
+import { MainContainerWithNav } from '@/components/ui/main-container';
+import { H1 } from '@/components/ui/typography';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function Settings() {
-    const { theme, setTheme } = useTheme();
+    // const { theme, setTheme } = useTheme();
 
-    const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setTheme(event.target.value as ThemeType);
-    };
+    // const handleThemeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    //     setTheme(event.target.value as ThemeType);
+    // };
 
     return (
-        <div>
-            <h1>Settings</h1>
-            <label htmlFor="theme-select">Choose a theme:</label>
-            <select id="theme-select" value={theme} onChange={handleThemeChange}>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-                <option value="dark green">Dark green</option>
-            </select>
-        </div>
+        <MainContainerWithNav>
+            <H1>Settings</H1>
+            <Card>
+                <CardContent></CardContent>
+            </Card>
+        </MainContainerWithNav>
     );
 }
