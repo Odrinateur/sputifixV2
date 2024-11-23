@@ -7,6 +7,7 @@ import { StorageProvider } from '@/context/StorageContext.tsx';
 import { Likes } from '@/pages/Likes.tsx';
 import { TopArtistsPage, TopTracksPage } from '@/pages/TopItems.tsx';
 import { PlaylistsPage } from '@/pages/Playlists';
+import { PlaylistPage } from './pages/Playlist';
 
 export default function App() {
     const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
@@ -22,6 +23,7 @@ export default function App() {
                         <Route path="/" element={<Home />} />
                         <Route path="/likes" element={<Likes />} />
                         <Route path="/playlists" element={<PlaylistsPage />} />
+                        <Route path="/playlist/:id" element={<PlaylistPage />} />
                         <Route path="/top/artists" element={<TopArtistsPage />} />
                         <Route path="/top/tracks" element={<TopTracksPage />} />
                         <Route path="/settings" element={<Settings />} />

@@ -14,10 +14,12 @@ type StorageContextType = {
     ): Promise<T[] | null>;
     getUserLikes(): Promise<SavedTrack[] | null>;
     getUserPlaylists(): Promise<SimplifiedPlaylist[] | null>;
+    getPlaylist(id: string): Promise<[SimplifiedPlaylist | null, Track[] | null]>;
 
     refreshUserTopItems(type: TopItemsType, limit?: number, timeRange?: TimeRangeType): void;
     refreshLikes(): void;
     refreshPlaylists(): void;
+    refreshPlaylist(id: string): void;
 };
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
@@ -158,7 +160,35 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
             playlists.push(...response.items);
         }
         setItem('playlists', JSON.stringify(playlists));
-        return playlists ?? null;
+        return playlists;
+    };
+
+    const getPlaylistTracks = async (id: string): Promise<Track[] | null> => {
+        const tracksInStorage = getItem('playlist_tracks', id);
+        if (tracksInStorage && tracksInStorage.lastUpdated + 3600 * 1000 > Date.now())
+            return JSON.parse(tracksInStorage.value);
+
+        const tracksItems = [];
+        let response = await sdk.playlists.getPlaylistItems(id, undefined, undefined, 50, 0);
+        tracksItems.push(...response.items);
+
+        while (response.next) {
+            response = await sdk.makeRequest('GET', response.next.replace('https://api.spotify.com/v1/', ''));
+            tracksItems.push(...response.items);
+        }
+
+        const tracks = tracksItems.map((item) => item.track);
+        setItem('playlist_tracks', JSON.stringify(tracks), id);
+        return tracks;
+    };
+
+    const getPlaylist = async (id: string): Promise<[SimplifiedPlaylist | null, Track[] | null]> => {
+        const userPlaylists = await getUserPlaylists();
+        const playlist = userPlaylists?.find((p) => p.id === id);
+        if (!playlist) return [null, null];
+
+        const tracks = await getPlaylistTracks(id);
+        return [playlist, tracks];
     };
 
     const resetLastUpdated = (key: string, secondKey?: string) => {
@@ -193,6 +223,11 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         await getUserPlaylists();
     };
 
+    const refreshPlaylist = async (id: string) => {
+        resetLastUpdated('playlist_tracks', id);
+        await getPlaylist(id);
+    };
+
     const storage = {
         getSettings,
         setSettings,
@@ -200,10 +235,12 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         getUserTopItems,
         getUserLikes,
         getUserPlaylists,
+        getPlaylist,
 
         refreshUserTopItems,
         refreshLikes,
         refreshPlaylists,
+        refreshPlaylist,
     };
 
     return <StorageContext.Provider value={storage}>{children}</StorageContext.Provider>;
