@@ -3,8 +3,27 @@ import { Button } from '@/components/ui/button.tsx';
 import { Link } from 'react-router-dom';
 import { AudioLines, ChartBar, Heart, House, ListMusic, Settings, Users } from 'lucide-react';
 import { H3 } from './ui/typography';
+import { Separator } from './ui/separator';
+import { Switch } from './ui/switch';
+import { useStorage } from '@/context/StorageContext';
+import { useEffect, useState } from 'react';
+import { ThemeType } from '@/types/common';
 
 export function Navbar() {
+    const { getTheme, setTheme } = useStorage();
+    const [currentTheme, setCurrentTheme] = useState<ThemeType>('dark');
+
+    useEffect(() => {
+        (async () => {
+            setCurrentTheme(await getTheme());
+        })();
+    }, [getTheme, setTheme]);
+
+    const handleThemeSwitch = () => {
+        setTheme(currentTheme === 'light' ? 'dark' : 'light');
+        setCurrentTheme(currentTheme === 'light' ? 'dark' : 'light');
+    };
+
     return (
         <nav className={'w-full lg:h-full lg:w-1/5 flex flex-col gap-5 justify-start lg:flex-1'}>
             <Card className={'w-full flex lg:flex-col py-4 gap-2 justify-center'}>
@@ -24,12 +43,18 @@ export function Navbar() {
                     Stats.fm
                 </H3>
             </Card>
-            <Card className={'w-full flex py-2 justify-center items-start lg:mt-auto'}>
+            <Card className={'w-full flex py-2 justify-center items-center lg:mt-auto lg:flex-col 2xl:flex-row'}>
                 <NavBarLinkWithIcon
                     to={'/settings'}
                     icon={<Settings className={'!w-6 !h-6'} />}
                     text={'Settings'}
                     isTextHidden={false}
+                />
+                <Separator orientation="vertical" className={'lg:hidden 2xl:block'} />
+                <Switch
+                    className={'my-2 mx-4'}
+                    checked={currentTheme === 'light'}
+                    onCheckedChange={handleThemeSwitch}
                 />
             </Card>
         </nav>

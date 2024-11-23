@@ -2,7 +2,7 @@ import { createContext, ReactNode, useContext } from 'react';
 import localForage from 'localforage';
 import CryptoJS from 'crypto-js';
 import { Artist, SavedTrack, SimplifiedPlaylist, SpotifyApi, Track, UserProfile } from '@spotify/web-api-ts-sdk';
-import { LimitType, TimeRangeType, TopItemsType } from '@/types/common.ts';
+import { LimitType, ThemeType, TimeRangeType, TopItemsType } from '@/types/common.ts';
 
 const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY as string;
 
@@ -16,8 +16,10 @@ const decryptData = (data: string) => {
 };
 
 type StorageContextType = {
-    getSettings(key: string, secondKey?: string): Promise<string>; // Changez ici
-    setSettings(key: string, jsonValue: string, secondKey?: string): Promise<void>; // Changez ici
+    getSettings(key: string, secondKey?: string): Promise<string>;
+    setSettings(key: string, jsonValue: string, secondKey?: string): Promise<void>;
+    getTheme(): Promise<ThemeType>;
+    setTheme(theme: string): void;
     getUser(): Promise<UserProfile | null>;
     getUserTopItems<T extends Artist | Track>(
         type: TopItemsType,
@@ -91,13 +93,23 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         const settings = await localForage.getItem('settings');
         if (settings) {
             const settingsJson = JSON.parse(decryptData(settings as string));
-            const jsonToStore = { value: jsonValue, lastUpdated: Date.now() };
-            if (secondKey) {
-                settingsJson[key] = settingsJson[key] || {};
-                settingsJson[key][secondKey] = jsonToStore;
-            } else settingsJson[key] = jsonToStore;
+            if (secondKey) settingsJson[key][secondKey] = jsonValue;
+            else settingsJson[key] = jsonValue;
             await localForage.setItem('settings', encryptData(JSON.stringify(settingsJson)));
         }
+    };
+
+    const getTheme = async (): Promise<ThemeType> => {
+        const theme = await getSettings('theme');
+        document.body.className = '';
+        document.body.classList.add(theme);
+        return theme as ThemeType;
+    };
+
+    const setTheme = async (theme: ThemeType) => {
+        await setSettings('theme', theme);
+        document.body.className = '';
+        document.body.classList.add(theme);
     };
 
     const getCurrentLimit = (limit: number) => Math.min(50, limit) as LimitType;
@@ -234,6 +246,8 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
     const storage = {
         getSettings,
         setSettings,
+        getTheme,
+        setTheme,
         getUser,
         getUserTopItems,
         getUserLikes,
