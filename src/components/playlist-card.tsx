@@ -22,10 +22,14 @@ export function PlaylistCard({ id }: { id: string }) {
     }, [getPlaylist, playlist, id]);
 
     return (
-        <Card className={'w-full h-2/5'}>
+        <Card className={'w-full sm:h-2/5'}>
             <CardContent className={'w-full h-full p-4 flex flex-col sm:flex-row justify-start gap-4'}>
                 {playlist ? (
-                    <Cover images={playlist.images} coverType={'playlist'} className={'rounded-xl !h-full'} />
+                    <Cover
+                        images={playlist.images}
+                        coverType={'playlist'}
+                        className={'rounded-xl w-full sm:w-auto sm:!h-full'}
+                    />
                 ) : (
                     <Skeleton className={'w-2/5 aspect-square'} />
                 )}
@@ -45,7 +49,7 @@ export function PlaylistCard({ id }: { id: string }) {
                                 </Link>
                             </H4>
                             <H4>ower id : {playlist.owner.id}</H4>
-                            <H4>{playlist.collaborative ? 'Collaborative' : 'N@ot collaborative'}</H4>
+                            <H4>{playlist.collaborative ? 'Collaborative' : 'Not collaborative'}</H4>
                         </>
                     ) : (
                         <>
