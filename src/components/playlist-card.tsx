@@ -27,7 +27,7 @@ export function PlaylistCard({ id }: { id: string }) {
                 {playlist ? (
                     <Cover images={playlist.images} coverType={'playlist'} className={'rounded-xl !h-full'} />
                 ) : (
-                    <Skeleton className={'w-32 h-32 sm:w-40 sm:h-40'} />
+                    <Skeleton className={'w-2/5 aspect-square'} />
                 )}
                 <div className={'w-3/5 h-full p-2 flex flex-col items-start gap-4'}>
                     {playlist ? (
