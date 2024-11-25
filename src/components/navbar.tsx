@@ -11,7 +11,6 @@ import { ThemeType } from '@/types/common';
 import { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk';
 import { Cover } from './ui/cover';
 import { Skeleton } from './ui/skeleton';
-import { StatsFMCard } from './statsfm-card';
 
 export function Navbar() {
     const {
@@ -78,7 +77,7 @@ export function Navbar() {
                     ))}
                 </Card>
             )}
-            <StatsFMCard />
+            {/* <StatsFMCard /> */}
             <Card className={'w-full flex py-2 justify-center items-center lg:mt-auto lg:flex-col 2xl:flex-row'}>
                 <NavBarLinkWithIcon
                     to={'/settings'}

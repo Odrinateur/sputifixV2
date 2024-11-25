@@ -11,7 +11,6 @@ import {
     TopDisplayLimit,
     TopDisplayLimits,
 } from '@/types/common';
-import { Switch } from '@/components/ui/switch';
 
 export function Settings() {
     const { getSettings, setSettings } = useStorage();
@@ -21,7 +20,7 @@ export function Settings() {
     const [homePageLimit, setHomePageLimit] = useState<HomeDisplayLimitType>(HomeDisplayLimits[0]);
     const [topItemsTimeRange, setTopItemsTimeRange] = useState<TimeRangeType>('medium_term');
     const [topItemsLimit, setTopItemsLimit] = useState<TopDisplayLimit>(TopDisplayLimits[0]);
-    const [statsFMEnabled, setStatsFMEnabled] = useState<boolean>(false);
+    // const [statsFMEnabled, setStatsFMEnabled] = useState<boolean>(false);
 
     useEffect(() => {
         (async () => {
@@ -29,21 +28,21 @@ export function Settings() {
             const homePageLimit = parseInt(await getSettings('home', 'limit')) as HomeDisplayLimitType;
             const topItemsTimeRange = (await getSettings('top_items', 'timeRange')) as TimeRangeType;
             const topItemsLimit = parseInt(await getSettings('top_items', 'limit')) as TopDisplayLimit;
-            const statsFMEnabled = (await getSettings('statsFM', 'display')) as unknown as boolean;
+            // const statsFMEnabled = (await getSettings('statsFM', 'display')) as unknown as boolean;
 
             setHomePageTimeRange(homePageTimeRange);
             setHomePageLimit(homePageLimit);
             setTopItemsTimeRange(topItemsTimeRange);
             setTopItemsLimit(topItemsLimit);
             setIsLoading(false);
-            setStatsFMEnabled(statsFMEnabled);
+            // setStatsFMEnabled(statsFMEnabled);
         })();
     }, [getSettings]);
 
-    const handleStatsFMSwitch = () => {
-        setStatsFMEnabled(!statsFMEnabled);
-        setSettings('statsFM', !statsFMEnabled as unknown as string, 'display');
-    };
+    // const handleStatsFMSwitch = () => {
+    //     setStatsFMEnabled(!statsFMEnabled);
+    //     setSettings('statsFM', !statsFMEnabled as unknown as string, 'display');
+    // };
 
     if (isLoading) {
         return (
@@ -144,10 +143,10 @@ export function Settings() {
                             </SelectContent>
                         </Select>
                     </div>
-                    <div className={'w-full flex flex-col sm:flex-row justify-center items-center gap-4'}>
+                    {/* <div className={'w-full flex flex-col sm:flex-row justify-center items-center gap-4'}>
                         <H4>Stats.fm</H4>
                         <Switch checked={statsFMEnabled} onCheckedChange={handleStatsFMSwitch} />
-                    </div>
+                    </div> */}
                 </CardContent>
             </Card>
         </MainContainerWithNav>
