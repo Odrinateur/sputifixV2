@@ -90,13 +90,12 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
     };
 
     const setSettings = async (key: string, jsonValue: string, secondKey?: string): Promise<void> => {
-        const settings = await localForage.getItem('settings');
-        if (settings) {
-            const settingsJson = JSON.parse(decryptData(settings as string));
-            if (secondKey) settingsJson[key][secondKey] = jsonValue;
-            else settingsJson[key] = jsonValue;
-            await localForage.setItem('settings', encryptData(JSON.stringify(settingsJson)));
-        }
+        console.log('setSettings', key, jsonValue, secondKey);
+        const settings = await getItem('settings');
+        const settingsJson = settings ? settings : {};
+        if (secondKey) settingsJson[key][secondKey] = jsonValue;
+        else settingsJson[key] = jsonValue;
+        await localForage.setItem('settings', encryptData(JSON.stringify(settingsJson)));
     };
 
     const getTheme = async (): Promise<ThemeType> => {
