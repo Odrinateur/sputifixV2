@@ -2,7 +2,8 @@ import { createContext, ReactNode, useContext } from 'react';
 import localForage from 'localforage';
 import CryptoJS from 'crypto-js';
 import { Artist, SavedTrack, SimplifiedPlaylist, SpotifyApi, Track, UserProfile } from '@spotify/web-api-ts-sdk';
-import { LimitType, ThemeType, TimeRangeType, TopItemsType } from '@/types/common.ts';
+import { LimitType, StatsFM, ThemeType, TimeRangeType, TopItemsType } from '@/types/common.ts';
+import { getUserStats } from '@/services/StatsFMService';
 
 const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY as string;
 
@@ -32,6 +33,8 @@ type StorageContextType = {
     setPinnedUserPlaylist(addOrRemove: 'add' | 'remove', id: string): void;
     getPinnedUserPlaylists(): Promise<SimplifiedPlaylist[] | null>;
 
+    getStatsFM(): Promise<[StatsFM | null, StatsFM | null]>;
+
     refreshUserTopItems(type: TopItemsType, limit?: number, timeRange?: TimeRangeType): void;
     refreshLikes(): void;
     refreshPlaylists(): void;
@@ -56,8 +59,8 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
                         limit: 100,
                         timeRange: 'medium_term',
                     },
-                    statsfm: {
-                        display: true,
+                    statsFM: {
+                        display: false,
                     },
                 };
                 localForage.setItem('settings', encryptData(JSON.stringify(defaultSettings)));
@@ -256,6 +259,18 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         return null;
     };
 
+    const getStatsFM = async (): Promise<[StatsFM | null, StatsFM | null]> => {
+        const statsInStorage = await getItem('statsfm');
+        if (statsInStorage && statsInStorage.lastUpdated + 3600 * 1000 > Date.now())
+            return JSON.parse(statsInStorage.value);
+
+        const user = await getUser();
+        if (!user) return [null, null];
+        const [weeks, lifetime] = await getUserStats(user.id);
+        await setItem('statsfm', JSON.stringify([weeks, lifetime]));
+        return [weeks, lifetime];
+    };
+
     const resetLastUpdated = async (key: string, secondKey?: string) => {
         const item = await getItem(key, secondKey);
         if (item) await setItem(key, item.value, secondKey);
@@ -298,6 +313,8 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         getPlaylist,
         setPinnedUserPlaylist,
         getPinnedUserPlaylists,
+
+        getStatsFM,
 
         refreshUserTopItems,
         refreshLikes,

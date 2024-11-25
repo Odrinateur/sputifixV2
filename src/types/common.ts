@@ -60,3 +60,49 @@ export type LoadingStates = 'idle' | 'loading' | 'end';
 
 export const HomeDisplayLimits: HomeDisplayLimitType[] = [4, 8, 12, 16, 20];
 export const TopDisplayLimits: TopDisplayLimit[] = [50, 100, 150, 200, 250];
+
+export interface StatsFMResponse {
+    items: {
+        durationMs: number;
+        count: number;
+        playedMs: {
+            percentiles: {
+                values: {
+                    '1.0': number;
+                    '5.0': number;
+                    '25.0': number;
+                    '50.0': number;
+                    '75.0': number;
+                    '95.0': number;
+                    '99.0': number;
+                };
+            };
+            count: number;
+            min: number;
+            max: number;
+            avg: number;
+            sum: number;
+        };
+        cardinality: {
+            tracks: number;
+            artists: number;
+            albums: number;
+        };
+    };
+}
+
+export class StatsFM {
+    minutes: number;
+    count: number;
+    tracks: number;
+    artists: number;
+    albums: number;
+
+    constructor(data: StatsFMResponse) {
+        this.minutes = Math.round(data.items.durationMs / 60000);
+        this.count = data.items.count;
+        this.tracks = data.items.cardinality.tracks;
+        this.artists = data.items.cardinality.artists;
+        this.albums = data.items.cardinality.albums;
+    }
+}

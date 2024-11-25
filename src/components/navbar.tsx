@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card.tsx';
 import { Button } from '@/components/ui/button.tsx';
 import { Link } from 'react-router-dom';
-import { AudioLines, ChartBar, Heart, House, ListMusic, Settings, Users } from 'lucide-react';
+import { AudioLines, Heart, House, ListMusic, Settings, Users } from 'lucide-react';
 import { H3 } from './ui/typography';
 import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
@@ -11,6 +11,7 @@ import { ThemeType } from '@/types/common';
 import { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk';
 import { Cover } from './ui/cover';
 import { Skeleton } from './ui/skeleton';
+import { StatsFMCard } from './statsfm-card';
 
 export function Navbar() {
     const {
@@ -77,12 +78,7 @@ export function Navbar() {
                     ))}
                 </Card>
             )}
-            <Card className={'w-full hidden lg:flex flex-col py-4 gap-2 items-center'}>
-                <H3 className={'flex items-center gap-2'}>
-                    <ChartBar className={'!w-6 !h-6'} />
-                    Stats.fm
-                </H3>
-            </Card>
+            <StatsFMCard />
             <Card className={'w-full flex py-2 justify-center items-center lg:mt-auto lg:flex-col 2xl:flex-row'}>
                 <NavBarLinkWithIcon
                     to={'/settings'}
