@@ -29,11 +29,15 @@ type StorageContextType = {
     getUserLikes(): Promise<SavedTrack[] | null>;
     getUserPlaylists(): Promise<SimplifiedPlaylist[] | null>;
     getPlaylist(id: string): Promise<[SimplifiedPlaylist | null, Track[] | null]>;
+    setPinnedUserPlaylist(addOrRemove: 'add' | 'remove', id: string): void;
+    getPinnedUserPlaylists(): Promise<SimplifiedPlaylist[] | null>;
 
     refreshUserTopItems(type: TopItemsType, limit?: number, timeRange?: TimeRangeType): void;
     refreshLikes(): void;
     refreshPlaylists(): void;
     refreshPlaylist(id: string): void;
+    subscribeToPinnedPlaylistsUpdate: (callback: () => void) => void;
+    unsubscribeFromPinnedPlaylistsUpdate: (callback: () => void) => void;
 };
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
@@ -73,7 +77,10 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
 
     const setItem = async (key: string, jsonValue: string, secondKey?: string) => {
         const item = await localForage.getItem(key);
-        const jsonToStore = key === 'settings' ? jsonValue : { value: jsonValue, lastUpdated: Date.now() };
+        const jsonToStore =
+            key === 'settings' || key === 'pinned_playlists'
+                ? jsonValue
+                : { value: jsonValue, lastUpdated: Date.now() };
         let itemJson = item ? JSON.parse(decryptData(item as string)) : {};
         if (secondKey) itemJson[secondKey] = jsonToStore;
         else itemJson = jsonToStore;
@@ -90,7 +97,6 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
     };
 
     const setSettings = async (key: string, jsonValue: string, secondKey?: string): Promise<void> => {
-        console.log('setSettings', key, jsonValue, secondKey);
         const settings = await getItem('settings');
         const settingsJson = settings ? settings : {};
         if (secondKey) settingsJson[key][secondKey] = jsonValue;
@@ -212,6 +218,44 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         return [playlist, tracks];
     };
 
+    const pinnedPlaylistsSubscribers: Set<() => void> = new Set();
+
+    const notifyPinnedPlaylistsSubscribers = () => {
+        pinnedPlaylistsSubscribers.forEach((callback) => callback());
+    };
+
+    const subscribeToPinnedPlaylistsUpdate = (callback: () => void) => {
+        pinnedPlaylistsSubscribers.add(callback);
+    };
+
+    const unsubscribeFromPinnedPlaylistsUpdate = (callback: () => void) => {
+        pinnedPlaylistsSubscribers.delete(callback);
+    };
+
+    const setPinnedUserPlaylist = async (addOrRemove: 'add' | 'remove', id: string) => {
+        const pinnedPlaylists = await getItem('pinned_playlists');
+        let pinnedIds = pinnedPlaylists ? JSON.parse(pinnedPlaylists) : [];
+        if (addOrRemove === 'add') {
+            if (!pinnedIds.includes(id)) {
+                pinnedIds.push(id);
+            }
+        } else {
+            pinnedIds = pinnedIds.filter((pinnedId: string) => pinnedId !== id);
+        }
+        await setItem('pinned_playlists', JSON.stringify(pinnedIds));
+        notifyPinnedPlaylistsSubscribers();
+    };
+
+    const getPinnedUserPlaylists = async (): Promise<SimplifiedPlaylist[] | null> => {
+        const pinnedPlaylists = await getItem('pinned_playlists');
+        if (pinnedPlaylists) {
+            const pinnedIds = JSON.parse(pinnedPlaylists);
+            const userPlaylists = await getUserPlaylists();
+            return userPlaylists?.filter((playlist) => pinnedIds.includes(playlist.id)) ?? null;
+        }
+        return null;
+    };
+
     const resetLastUpdated = async (key: string, secondKey?: string) => {
         const item = await getItem(key, secondKey);
         if (item) await setItem(key, item.value, secondKey);
@@ -252,11 +296,15 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         getUserLikes,
         getUserPlaylists,
         getPlaylist,
+        setPinnedUserPlaylist,
+        getPinnedUserPlaylists,
 
         refreshUserTopItems,
         refreshLikes,
         refreshPlaylists,
         refreshPlaylist,
+        subscribeToPinnedPlaylistsUpdate,
+        unsubscribeFromPinnedPlaylistsUpdate,
     };
 
     return <StorageContext.Provider value={storage}>{children}</StorageContext.Provider>;

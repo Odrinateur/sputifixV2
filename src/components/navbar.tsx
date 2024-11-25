@@ -8,16 +8,36 @@ import { Switch } from './ui/switch';
 import { useStorage } from '@/context/StorageContext';
 import { useEffect, useState } from 'react';
 import { ThemeType } from '@/types/common';
+import { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk';
+import { Cover } from './ui/cover';
+import { Skeleton } from './ui/skeleton';
 
 export function Navbar() {
-    const { getTheme, setTheme } = useStorage();
+    const {
+        getTheme,
+        setTheme,
+        getPinnedUserPlaylists,
+        subscribeToPinnedPlaylistsUpdate,
+        unsubscribeFromPinnedPlaylistsUpdate,
+    } = useStorage();
     const [currentTheme, setCurrentTheme] = useState<ThemeType>('dark');
+    const [pinnedPlaylists, setPinnedPlaylists] = useState<SimplifiedPlaylist[] | null>(null);
 
     useEffect(() => {
+        const updatePinnedPlaylists = async () => {
+            setPinnedPlaylists(await getPinnedUserPlaylists());
+        };
+
         (async () => {
             setCurrentTheme(await getTheme());
+            updatePinnedPlaylists();
         })();
-    }, [getTheme, setTheme]);
+
+        subscribeToPinnedPlaylistsUpdate(updatePinnedPlaylists);
+        return () => {
+            unsubscribeFromPinnedPlaylistsUpdate(updatePinnedPlaylists);
+        };
+    }, [getPinnedUserPlaylists, getTheme, subscribeToPinnedPlaylistsUpdate, unsubscribeFromPinnedPlaylistsUpdate]);
 
     const handleThemeSwitch = () => {
         setTheme(currentTheme === 'light' ? 'dark' : 'light');
@@ -25,7 +45,7 @@ export function Navbar() {
     };
 
     return (
-        <nav className={'w-full lg:h-full lg:w-1/5 flex flex-col gap-5 justify-start lg:flex-1'}>
+        <nav className={'w-full lg:h-full lg:w-1/5 2xl:w-1/6 flex flex-col gap-5 justify-start lg:flex-1'}>
             <Card className={'w-full flex lg:flex-col py-4 gap-2 justify-center'}>
                 <NavBarLinkWithIcon to={'/'} icon={<House className={'!w-6 !h-6'} />} text={'Home'} />
                 <NavBarLinkWithIcon to={'/likes'} icon={<Heart className={'!w-6 !h-6'} />} text={'Likes'} />
@@ -37,6 +57,26 @@ export function Navbar() {
                     text={'Top Tracks'}
                 />
             </Card>
+            {pinnedPlaylists ? (
+                <Card className="w-full flex px-4 py-4 gap-4 items-center overflow-x-auto">
+                    {pinnedPlaylists.map((playlist) => (
+                        <Link to={`/playlist/${playlist.id}`} key={playlist.id} className={'w-10 h-10 flex-shrink-0'}>
+                            <Cover
+                                images={playlist.images}
+                                coverType="playlist"
+                                key={playlist.id}
+                                className="object-cover w-full h-full rounded-md"
+                            />
+                        </Link>
+                    ))}
+                </Card>
+            ) : (
+                <Card className={'w-full flex px-4 py-4 gap-4 items-center overflow-x-auto'}>
+                    {[...Array(10)].map((_, index) => (
+                        <Skeleton key={index} className={'w-10 h-10 flex-shrink-0'} />
+                    ))}
+                </Card>
+            )}
             <Card className={'w-full hidden lg:flex flex-col py-4 gap-2 items-center'}>
                 <H3 className={'flex items-center gap-2'}>
                     <ChartBar className={'!w-6 !h-6'} />

@@ -2,11 +2,30 @@ import { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { H1, H4 } from '@/components/ui/typography.tsx';
-import { Link2 } from 'lucide-react';
+import { Bookmark, Link2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Cover } from '@/components/ui/cover.tsx';
+import { useStorage } from '@/context/StorageContext';
+import { useEffect, useState } from 'react';
 
 export function PlaylistCard({ playlist }: { playlist: SimplifiedPlaylist | null }) {
+    const { getPinnedUserPlaylists, setPinnedUserPlaylist } = useStorage();
+    const [isPinned, setIsPinned] = useState(false);
+
+    useEffect(() => {
+        (async () => {
+            const pinnedPlaylists = await getPinnedUserPlaylists();
+            if (!playlist) return;
+            setIsPinned(pinnedPlaylists ? pinnedPlaylists.find((p) => p.id === playlist.id) !== undefined : false);
+        })();
+    }, [getPinnedUserPlaylists, playlist]);
+
+    const handlePinPlaylist = async () => {
+        if (!playlist) return;
+        await setPinnedUserPlaylist(isPinned ? 'remove' : 'add', playlist.id);
+        setIsPinned(!isPinned);
+    };
+
     return (
         <Card className={'w-full sm:h-2/5'}>
             <CardContent className={'w-full h-full p-4 flex flex-col sm:flex-row justify-start gap-4'}>
@@ -23,6 +42,15 @@ export function PlaylistCard({ playlist }: { playlist: SimplifiedPlaylist | null
                     {playlist ? (
                         <>
                             <H1 className={'flex justify-center items-center gap-4'}>
+                                {isPinned ? (
+                                    <Bookmark
+                                        onClick={handlePinPlaylist}
+                                        className={'!w-8 !h-8 cursor-pointer'}
+                                        fill="currentColor"
+                                    />
+                                ) : (
+                                    <Bookmark onClick={handlePinPlaylist} className={'!w-8 !h-8 cursor-pointer'} />
+                                )}
                                 {playlist.name}
                                 <Link to={playlist.external_urls.spotify} target="_blank">
                                     <Link2 className={'!w-12 !h-12'} />

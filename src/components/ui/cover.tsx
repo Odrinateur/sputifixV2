@@ -1,3 +1,4 @@
+import React from 'react';
 import { Image } from '@spotify/web-api-ts-sdk';
 import { Disc3, ListMusic, SquareLibrary, SquareUserRound, User } from 'lucide-react';
 
@@ -9,7 +10,7 @@ interface CoverProps {
     className?: string;
 }
 
-export function Cover({ images, coverType, className }: CoverProps) {
+export const Cover: React.FC<CoverProps> = ({ images, coverType, className }) => {
     if (!images || images.length === 0) {
         switch (coverType) {
             case 'album':
@@ -37,7 +38,7 @@ export function Cover({ images, coverType, className }: CoverProps) {
     if (coverType != 'user') className = `${className} h-max aspect-square`;
 
     return <img src={image} alt={`${coverType} cover`} className={`object-cover ${className}`} />;
-}
+};
 
 function AlbumCover(className: string | undefined) {
     return <SquareLibrary className={`${className}`} />;
