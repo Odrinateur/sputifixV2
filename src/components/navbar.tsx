@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card.tsx';
 import { Button } from '@/components/ui/button.tsx';
-import { Link } from 'react-router-dom';
-import { AudioLines, Heart, House, ListMusic, Settings, Users } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { AudioLines, Blocks, Heart, House, ListMusic, Settings, Users } from 'lucide-react';
 import { H3 } from './ui/typography';
 import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
@@ -46,7 +46,7 @@ export function Navbar() {
 
     return (
         <nav className={'w-full lg:h-full lg:w-1/5 2xl:w-1/6 flex flex-col gap-5 justify-start lg:flex-1'}>
-            <Card className={'w-full flex lg:flex-col py-4 gap-2 justify-center'}>
+            <Card className={'w-full flex lg:flex-col py-4 gap-2 justify-center items-center'}>
                 <NavBarLinkWithIcon to={'/'} icon={<House className={'!w-6 !h-6'} />} text={'Home'} />
                 <NavBarLinkWithIcon to={'/likes'} icon={<Heart className={'!w-6 !h-6'} />} text={'Likes'} />
                 <NavBarLinkWithIcon to={'/playlists'} icon={<ListMusic className={'!w-6 !h-6'} />} text={'Playlists'} />
@@ -56,6 +56,8 @@ export function Navbar() {
                     icon={<AudioLines className={'!w-6 !h-6'} />}
                     text={'Top Tracks'}
                 />
+                <Separator className={'hidden lg:block w-3/5'} />
+                <NavBarLinkWithIcon to={'/maker'} icon={<Blocks className={'!w-6 !h-6'} />} text={'Maker'} />
             </Card>
             {pinnedPlaylists ? (
                 <Card className="w-full flex px-4 py-4 gap-4 items-center overflow-x-auto">
@@ -106,11 +108,19 @@ const NavBarLinkWithIcon = ({
     icon: React.ReactNode;
     text: string;
     isTextHidden?: boolean;
-}) => (
-    <Button variant="link" className={'text-2xl'}>
-        <Link to={to} className={'w-full flex justify-center items-center gap-2'}>
-            {icon}
-            <H3 className={isTextHidden ? 'hidden lg:block' : ''}>{text}</H3>
-        </Link>
-    </Button>
-);
+}) => {
+    const location = useLocation();
+    const isActive = location.pathname === to;
+
+    return (
+        <Button
+            variant="link"
+            className={`text-2xl transition-colors ${isActive ? 'bg-foreground text-background' : ''}`}
+        >
+            <Link to={to} className={`w-full flex justify-center items-center gap-2`}>
+                {icon}
+                <H3 className={isTextHidden ? 'hidden lg:block' : ''}>{text}</H3>
+            </Link>
+        </Button>
+    );
+};

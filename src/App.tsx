@@ -7,6 +7,7 @@ import { Likes } from '@/pages/Likes.tsx';
 import { TopArtistsPage, TopTracksPage } from '@/pages/TopItems.tsx';
 import { PlaylistsPage } from '@/pages/Playlists';
 import { PlaylistPage } from './pages/Playlist';
+import { Maker } from './pages/maker/Maker';
 
 export default function App() {
     const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
@@ -25,6 +26,10 @@ export default function App() {
                     <Route path="/top/artists" element={<TopArtistsPage />} />
                     <Route path="/top/tracks" element={<TopTracksPage />} />
                     <Route path="/settings" element={<Settings />} />
+
+                    <Route path="/maker" element={<Maker />} />
+
+                    <Route path="*" element={<Home />} />
                 </Routes>
             </Router>
         </StorageProvider>
