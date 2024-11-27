@@ -176,11 +176,9 @@ function Step2({
 
     useEffect(() => {
         const delaySearch = setTimeout(async () => {
-            if (searchQuery.length > 2) {
+            if (searchQuery.length !== 0) {
                 const results = await searchArtistByName(searchQuery);
                 setSearchResults(results);
-            } else {
-                setSearchResults(null);
             }
         }, 500);
 
