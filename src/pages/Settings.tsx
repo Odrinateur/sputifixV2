@@ -71,8 +71,8 @@ export function Settings() {
                                 {homePageTimeRange === 'short_term'
                                     ? '4 weeks'
                                     : homePageTimeRange === 'medium_term'
-                                    ? '6 months'
-                                    : '1 year'}
+                                      ? '6 months'
+                                      : '1 year'}
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="short_term">4 weeks</SelectItem>
@@ -114,8 +114,8 @@ export function Settings() {
                                 {topItemsTimeRange === 'short_term'
                                     ? '4 weeks'
                                     : topItemsTimeRange === 'medium_term'
-                                    ? '6 months'
-                                    : '1 year'}
+                                      ? '6 months'
+                                      : '1 year'}
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="short_term">4 weeks</SelectItem>

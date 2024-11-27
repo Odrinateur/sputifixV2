@@ -98,8 +98,8 @@ export function TopItems<T extends Artist | Track>({
                             {timeRange === 'short_term'
                                 ? '4 weeks'
                                 : timeRange === 'medium_term'
-                                ? '6 months'
-                                : '1 year'}
+                                  ? '6 months'
+                                  : '1 year'}
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="short_term">4 weeks</SelectItem>
