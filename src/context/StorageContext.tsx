@@ -255,14 +255,14 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         notifyPinnedPlaylistsSubscribers();
     };
 
-    const getPinnedUserPlaylists = async (): Promise<SimplifiedPlaylist[] | null> => {
+    const getPinnedUserPlaylists = async (): Promise<SimplifiedPlaylist[]> => {
         const pinnedPlaylists = await getItem('pinned_playlists');
         if (pinnedPlaylists) {
             const pinnedIds = JSON.parse(pinnedPlaylists);
             const userPlaylists = await getUserPlaylists();
-            return userPlaylists?.filter((playlist) => pinnedIds.includes(playlist.id)) ?? null;
+            return userPlaylists?.filter((playlist) => pinnedIds.includes(playlist.id)) ?? [];
         }
-        return null;
+        return [];
     };
 
     const getStatsFM = async (): Promise<[StatsFM | null, StatsFM | null]> => {

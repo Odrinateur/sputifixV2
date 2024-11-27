@@ -59,25 +59,31 @@ export function Navbar() {
                 <Separator className={'hidden lg:block w-3/5'} />
                 <NavBarLinkWithIcon to={'/maker'} icon={<Blocks className={'!w-6 !h-6'} />} text={'Maker'} />
             </Card>
-            {pinnedPlaylists ? (
-                <Card className="w-full flex px-4 py-4 gap-4 items-center overflow-x-auto">
-                    {pinnedPlaylists.map((playlist) => (
-                        <Link to={`/playlist/${playlist.id}`} key={playlist.id} className={'w-10 h-10 flex-shrink-0'}>
-                            <Cover
-                                images={playlist.images}
-                                coverType="playlist"
-                                key={playlist.id}
-                                className="object-cover w-full h-full rounded-md"
-                            />
-                        </Link>
-                    ))}
-                </Card>
-            ) : (
+            {!pinnedPlaylists ? (
                 <Card className={'w-full flex px-4 py-4 gap-4 items-center overflow-x-auto'}>
                     {[...Array(10)].map((_, index) => (
                         <Skeleton key={index} className={'w-10 h-10 flex-shrink-0'} />
                     ))}
                 </Card>
+            ) : (
+                pinnedPlaylists.length > 0 && (
+                    <Card className="w-full flex px-4 py-4 gap-4 items-center overflow-x-auto">
+                        {pinnedPlaylists.map((playlist) => (
+                            <Link
+                                to={`/playlist/${playlist.id}`}
+                                key={playlist.id}
+                                className={'w-10 h-10 flex-shrink-0'}
+                            >
+                                <Cover
+                                    images={playlist.images}
+                                    coverType="playlist"
+                                    key={playlist.id}
+                                    className="object-cover w-full h-full rounded-md"
+                                />
+                            </Link>
+                        ))}
+                    </Card>
+                )
             )}
             {/* <StatsFMCard /> */}
             <Card className={'w-full flex py-2 justify-center items-center lg:mt-auto lg:flex-col 2xl:flex-row'}>
