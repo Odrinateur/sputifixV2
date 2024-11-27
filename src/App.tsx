@@ -8,6 +8,8 @@ import { TopArtistsPage, TopTracksPage } from '@/pages/TopItems.tsx';
 import { PlaylistsPage } from '@/pages/Playlists';
 import { PlaylistPage } from './pages/Playlist';
 import { Maker } from './pages/maker/Maker';
+import { MakerProvider } from './context/MakerContext';
+import { ArtistPlaylist } from './pages/maker/ArtistPlaylist';
 
 export default function App() {
     const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
@@ -17,21 +19,24 @@ export default function App() {
 
     return sdk ? (
         <StorageProvider sdk={sdk}>
-            <Router>
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/likes" element={<Likes />} />
-                    <Route path="/playlists" element={<PlaylistsPage />} />
-                    <Route path="/playlist/:id" element={<PlaylistPage />} />
-                    <Route path="/top/artists" element={<TopArtistsPage />} />
-                    <Route path="/top/tracks" element={<TopTracksPage />} />
-                    <Route path="/settings" element={<Settings />} />
+            <MakerProvider sdk={sdk}>
+                <Router>
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/likes" element={<Likes />} />
+                        <Route path="/playlists" element={<PlaylistsPage />} />
+                        <Route path="/playlist/:id" element={<PlaylistPage />} />
+                        <Route path="/top/artists" element={<TopArtistsPage />} />
+                        <Route path="/top/tracks" element={<TopTracksPage />} />
+                        <Route path="/settings" element={<Settings />} />
 
-                    <Route path="/maker" element={<Maker />} />
+                        <Route path="/maker" element={<Maker />} />
+                        <Route path="/maker/artist-playlist" element={<ArtistPlaylist />} />
 
-                    <Route path="*" element={<Home />} />
-                </Routes>
-            </Router>
+                        <Route path="*" element={<Home />} />
+                    </Routes>
+                </Router>
+            </MakerProvider>
         </StorageProvider>
     ) : (
         <></>

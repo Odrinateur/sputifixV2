@@ -28,7 +28,7 @@ type StorageContextType = {
         timeRange?: TimeRangeType
     ): Promise<T[] | null>;
     getUserLikes(): Promise<SavedTrack[] | null>;
-    getUserPlaylists(): Promise<SimplifiedPlaylist[] | null>;
+    getUserPlaylists(owned?: boolean): Promise<SimplifiedPlaylist[] | null>;
     getPlaylist(id: string): Promise<[SimplifiedPlaylist | null, Track[] | null]>;
     setPinnedUserPlaylist(addOrRemove: 'add' | 'remove', id: string): void;
     getPinnedUserPlaylists(): Promise<SimplifiedPlaylist[] | null>;
@@ -176,10 +176,15 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         return likes ?? null;
     };
 
-    const getUserPlaylists = async (): Promise<SimplifiedPlaylist[] | null> => {
+    const getUserPlaylists = async (owned = false): Promise<SimplifiedPlaylist[] | null> => {
         const playlistsInStorage = await getItem('playlists');
-        if (playlistsInStorage && playlistsInStorage.lastUpdated + 3600 * 1000 > Date.now())
-            return JSON.parse(playlistsInStorage.value);
+        if (playlistsInStorage && playlistsInStorage.lastUpdated + 3600 * 1000 > Date.now()) {
+            const playlistsJson = JSON.parse(playlistsInStorage.value);
+            const user = await getUser();
+            return owned
+                ? playlistsJson.filter((playlist: SimplifiedPlaylist) => playlist?.owner.id === user?.id)
+                : playlistsJson;
+        }
 
         const playlists = [];
         let response = await sdk.currentUser.playlists.playlists(50, 0);
@@ -189,8 +194,9 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
             response = await sdk.makeRequest('GET', response.next.replace('https://api.spotify.com/v1/', ''));
             playlists.push(...response.items);
         }
-        await setItem('playlists', JSON.stringify(playlists));
-        return playlists;
+        const filteredPlaylists = playlists.filter((playlist) => playlist !== null);
+        await setItem('playlists', JSON.stringify(filteredPlaylists));
+        return filteredPlaylists;
     };
 
     const getPlaylistTracks = async (id: string): Promise<Track[] | null> => {
@@ -273,7 +279,7 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
 
     const resetLastUpdated = async (key: string, secondKey?: string) => {
         const item = await getItem(key, secondKey);
-        if (item) await setItem(key, item.value, secondKey);
+        if (item) await localForage.removeItem(key);
     };
 
     const refreshUserTopItems = async (

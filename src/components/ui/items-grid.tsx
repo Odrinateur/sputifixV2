@@ -3,8 +3,10 @@ import { CardContent } from '@/components/ui/card.tsx';
 import {
     ArtistCard,
     ArtistSkeleton,
+    ArtistWithSelectCard,
     PlaylistCard,
     PlaylistSkeleton,
+    PlaylistWithSelectCard,
     TrackCard,
     TrackSkeleton,
 } from '@/components/ui/item-card.tsx';
@@ -33,10 +35,60 @@ export const ArtistsGrid = ({ items }: { items: Artist[] | null }) => (
     />
 );
 
+export const ArtistsWithSelectGrid = ({
+    items,
+    addArtist,
+    removeArtist,
+    selectedArtists,
+}: {
+    items: Artist[] | null;
+    addArtist: (artist: Artist) => void;
+    removeArtist: (artist: Artist) => void;
+    selectedArtists: Artist[] | null;
+}) => (
+    <ItemsGrid
+        items={items}
+        ItemComponent={({ item }) => (
+            <ArtistWithSelectCard
+                artist={item}
+                addArtist={addArtist}
+                removeArtist={removeArtist}
+                isSelected={selectedArtists?.some((a) => a.id === item.id) ?? false}
+            />
+        )}
+        SkeletonComponent={() => <></>}
+    />
+);
+
 export const PlaylistsGrid = ({ items }: { items: SimplifiedPlaylist[] | null }) => (
     <ItemsGrid
         items={items}
         ItemComponent={({ item }) => <PlaylistCard playlist={item} />}
+        SkeletonComponent={PlaylistSkeleton}
+    />
+);
+
+export const PlaylistWithSelectGrid = ({
+    items,
+    addPlaylist,
+    removePlaylist,
+    selectedPlaylists,
+}: {
+    items: SimplifiedPlaylist[] | null;
+    addPlaylist: (playlist: SimplifiedPlaylist) => void;
+    removePlaylist: (playlist: SimplifiedPlaylist) => void;
+    selectedPlaylists: SimplifiedPlaylist[] | null;
+}) => (
+    <ItemsGrid
+        items={items}
+        ItemComponent={({ item }) => (
+            <PlaylistWithSelectCard
+                playlist={item}
+                addPlaylist={addPlaylist}
+                removePlaylist={removePlaylist}
+                isSelected={selectedPlaylists?.some((p) => p.id === item.id) ?? false}
+            />
+        )}
         SkeletonComponent={PlaylistSkeleton}
     />
 );

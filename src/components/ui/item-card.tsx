@@ -4,6 +4,7 @@ import { Cover } from '@/components/ui/cover.tsx';
 import { H3, H4 } from '@/components/ui/typography.tsx';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { Link } from 'react-router-dom';
+import { Checkbox } from './checkbox';
 
 function Container({
     children,
@@ -38,6 +39,42 @@ function ArtistCard({ artist }: { artist: Artist }) {
     );
 }
 
+function ArtistWithSelectCard({
+    artist,
+    addArtist,
+    removeArtist,
+    isSelected,
+}: {
+    artist: Artist;
+    addArtist: (artist: Artist) => void;
+    removeArtist: (artist: Artist) => void;
+    isSelected: boolean;
+}) {
+    return (
+        <Container>
+            <Cover
+                images={artist.images}
+                coverType={'artist'}
+                className={'w-full aspect-square rounded-lg brightness-[0.8]'}
+            />
+            <div className={'w-full flex justify-center items-center'}>
+                <H3 className={'w-4/5 truncate'}>{artist.name}</H3>
+                <Checkbox
+                    className={'size-6 border-2'}
+                    checked={isSelected}
+                    onCheckedChange={(checked: boolean) => {
+                        if (checked) {
+                            addArtist(artist);
+                        } else {
+                            removeArtist(artist);
+                        }
+                    }}
+                />
+            </div>
+        </Container>
+    );
+}
+
 function PlaylistCard({ playlist }: { playlist: SimplifiedPlaylist }) {
     return (
         <Link to={`/playlist/${playlist.id}`}>
@@ -47,6 +84,38 @@ function PlaylistCard({ playlist }: { playlist: SimplifiedPlaylist }) {
                 <H4>{playlist.owner.display_name}</H4>
             </Container>
         </Link>
+    );
+}
+
+function PlaylistWithSelectCard({
+    playlist,
+    addPlaylist,
+    removePlaylist,
+    isSelected,
+}: {
+    playlist: SimplifiedPlaylist;
+    addPlaylist: (playlist: SimplifiedPlaylist) => void;
+    removePlaylist: (playlist: SimplifiedPlaylist) => void;
+    isSelected: boolean;
+}) {
+    return (
+        <Container>
+            <Cover images={playlist.images} coverType={'playlist'} className={'w-full aspect-square rounded-lg'} />
+            <div className={'w-full flex justify-center items-center'}>
+                <H3 className={'w-4/5 truncate'}>{playlist.name}</H3>
+                <Checkbox
+                    className={'size-6 border-2'}
+                    checked={isSelected}
+                    onCheckedChange={(checked: boolean) => {
+                        if (checked) {
+                            addPlaylist(playlist);
+                        } else {
+                            removePlaylist(playlist);
+                        }
+                    }}
+                />
+            </div>
+        </Container>
     );
 }
 
@@ -89,4 +158,13 @@ function TrackSkeleton() {
     );
 }
 
-export { ArtistCard, PlaylistCard, TrackCard, ArtistSkeleton, PlaylistSkeleton, TrackSkeleton };
+export {
+    ArtistCard,
+    ArtistWithSelectCard,
+    PlaylistCard,
+    PlaylistWithSelectCard,
+    TrackCard,
+    ArtistSkeleton,
+    PlaylistSkeleton,
+    TrackSkeleton,
+};
