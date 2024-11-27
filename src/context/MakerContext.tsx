@@ -66,13 +66,14 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
         const playlistTracks = playlist ? await getPlaylistTracks(playlist) : undefined;
 
         const uniqueTracks = removeDuplicates(artistTracks, playlistTracks);
-        if (uniqueTracks.length === 0) return;
 
         if (playlist) {
-            await sdk.playlists.addItemsToPlaylist(
-                playlist.id,
-                uniqueTracks.map((track) => track.uri)
-            );
+            if (uniqueTracks.length !== 0) {
+                await sdk.playlists.addItemsToPlaylist(
+                    playlist.id,
+                    uniqueTracks.map((track) => track.uri)
+                );
+            }
             if (artists.length > 0) {
                 await sdk.playlists.changePlaylistDetails(playlist.id, {
                     description: `ids: ${artists.map((artist) => artist.id).join(',')}`,
