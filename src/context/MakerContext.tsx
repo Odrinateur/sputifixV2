@@ -46,8 +46,6 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
             if (!artistIds) return;
         } else artistIds = artists.map((artist) => artist.id);
 
-        console.log(playlist, artists, artistIds);
-
         const artistTracks = [];
         for (const artistId of artistIds) {
             let tracks: SimplifiedTrack[];
