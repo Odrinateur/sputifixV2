@@ -28,7 +28,10 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
             return;
         }
 
-        for (const playlist of playlists) await processOnePlaylist(playlist, artists, artistTracksCache);
+        for (const playlist of playlists) {
+            await processOnePlaylist(playlist, artists, artistTracksCache);
+            await new Promise((resolve) => setTimeout(resolve, 30000));
+        }
     };
 
     const processOnePlaylist = async (
