@@ -12,6 +12,8 @@ import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useMaker } from '@/context/MakerContext';
 import { useNavigate } from 'react-router-dom';
+import { RefreshPlaylistsButton } from '@/components/refresh';
+import { LoadingStates } from '@/types/common';
 
 type Step = 1 | 2 | 3;
 
@@ -77,15 +79,27 @@ function Step1({
     const [isNewPlaylist, setIsNewPlaylist] = useState<boolean>(true);
     const [globalFilter, setGlobalFilter] = useState<string>('');
     const [filteredPlaylists, setFilteredPlaylists] = useState<SimplifiedPlaylist[] | null>(null);
+    const [loadingState, setLoadingState] = useState<LoadingStates>('idle');
 
     useEffect(() => {
         (async () => {
-            await getUserPlaylists(true).then((playlists) => {
-                setPlaylists(playlists);
-                setFilteredPlaylists(playlists);
-            });
+            if (loadingState === 'loading') {
+                setPlaylists(null);
+                setFilteredPlaylists(null);
+            } else if (loadingState === 'end') {
+                await getUserPlaylists(true).then((playlists) => {
+                    setPlaylists(playlists);
+                    setFilteredPlaylists(playlists);
+                    setLoadingState('idle');
+                });
+            } else if (loadingState === 'idle' && !playlists) {
+                await getUserPlaylists(true).then((playlists) => {
+                    setPlaylists(playlists);
+                    setFilteredPlaylists(playlists);
+                });
+            }
         })();
-    }, [getUserPlaylists]);
+    }, [loadingState, getUserPlaylists, playlists]);
 
     useEffect(() => {
         if (!playlists) return;
@@ -143,12 +157,15 @@ function Step1({
 
             {!isNewPlaylist && (
                 <>
-                    <Input
-                        placeholder="Search playlists..."
-                        value={globalFilter}
-                        onChange={(e) => setGlobalFilter(e.target.value)}
-                        className="w-2/3"
-                    />
+                    <div className={'w-2/3 flex items-center gap-4'}>
+                        <Input
+                            placeholder="Search playlists..."
+                            value={globalFilter}
+                            onChange={(e) => setGlobalFilter(e.target.value)}
+                            className=""
+                        />
+                        <RefreshPlaylistsButton setLoadingState={setLoadingState} />
+                    </div>
                     <PlaylistWithSelectGrid
                         items={filteredPlaylists}
                         addPlaylist={addPlaylist}
@@ -232,7 +249,7 @@ function Step3({
     useEffect(() => {
         async function process() {
             await processPlaylists(selectedPlaylists, selectedArtists);
-            await refreshPlaylists();
+            await refreshPlaylists(10);
             setIsCompleted(true);
         }
         process();
