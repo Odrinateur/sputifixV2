@@ -37,7 +37,7 @@ type StorageContextType = {
 
     refreshUserTopItems(type: TopItemsType, limit?: number, timeRange?: TimeRangeType): void;
     refreshLikes(): void;
-    refreshPlaylists(): void;
+    refreshPlaylists(secondDelay?: number): void;
     refreshPlaylist(id: string): void;
     subscribeToPinnedPlaylistsUpdate: (callback: () => void) => void;
     unsubscribeFromPinnedPlaylistsUpdate: (callback: () => void) => void;
@@ -297,7 +297,17 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         await getUserLikes();
     };
 
-    const refreshPlaylists = async () => {
+    const refreshPlaylists = async (secondDelay = 0) => {
+        if (secondDelay > 0) {
+            const item = await localForage.getItem('playlists');
+            if (item) {
+                const itemJson = JSON.parse(decryptData(item as string));
+                // It has to refresh in the next secondDelay seconds
+                itemJson.lastUpdated = Date.now() - 3600 * 1000 + secondDelay * 1000;
+                await localForage.setItem('playlists', encryptData(JSON.stringify(itemJson)));
+                return;
+            }
+        }
         await resetLastUpdated('playlists');
         await getUserPlaylists();
     };
