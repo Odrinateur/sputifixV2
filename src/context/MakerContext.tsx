@@ -36,15 +36,22 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
         artists: Artist[],
         artistTracksCache: Map<string, SimplifiedTrack[]>
     ) => {
-        let artistIds: string[] = [];
-        if (artists.length === 0) {
-            if (!playlist) return;
+        let artistIds: string[] = artists.map((artist) => artist.id);
+
+        if (playlist) {
             let artistsIdsDescription = playlist.description;
-            if (!artistsIdsDescription || !artistsIdsDescription.startsWith('ids: ')) return;
-            artistsIdsDescription = artistsIdsDescription.replace('ids: ', '');
-            artistIds = artistsIdsDescription.split(',');
-            if (!artistIds) return;
-        } else artistIds = artists.map((artist) => artist.id);
+            console.log(artistsIdsDescription);
+            if (artistsIdsDescription && artistsIdsDescription.startsWith('ids: ')) {
+                artistsIdsDescription = artistsIdsDescription.replace('ids: ', '');
+                const descriptionArtistIds = artistsIdsDescription.split(',');
+                if (descriptionArtistIds) {
+                    artistIds = [...new Set([...artistIds, ...descriptionArtistIds])];
+                    console.log(artistIds);
+                }
+            }
+        }
+
+        if (artistIds.length === 0) return;
 
         const artistTracks = [];
         for (const artistId of artistIds) {
@@ -74,15 +81,9 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
                     uniqueTracks.map((track) => track.uri)
                 );
             }
-            if (artists.length > 0) {
-                await sdk.playlists.changePlaylistDetails(playlist.id, {
-                    description: `ids: ${artists.map((artist) => artist.id).join(',')}`,
-                });
-            } else {
-                await sdk.playlists.changePlaylistDetails(playlist.id, {
-                    description: `ids: ${artistIds.join(',')}`,
-                });
-            }
+            await sdk.playlists.changePlaylistDetails(playlist.id, {
+                description: `ids: ${artistIds.join(',')}`,
+            });
         } else {
             const newPlaylist = await sdk.playlists.createPlaylist((await sdk.currentUser.profile()).id, {
                 name: artists.map((artist) => artist.name).join('/ '),
