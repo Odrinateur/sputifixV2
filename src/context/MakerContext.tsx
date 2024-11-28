@@ -94,6 +94,7 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
             const newPlaylist = await sdk.playlists.createPlaylist((await sdk.currentUser.profile()).id, {
                 name: artists.map((artist) => artist.name).join('/ '),
                 description: `ids: ${artists.map((artist) => artist.id).join(',')}`,
+                public: false,
             });
 
             const trackUris = uniqueTracks.map((track) => track.uri);
