@@ -249,7 +249,7 @@ function Step3({
     useEffect(() => {
         async function process() {
             await processPlaylists(selectedPlaylists, selectedArtists);
-            await refreshPlaylists(10);
+            await refreshPlaylists(30);
             setIsCompleted(true);
         }
         process();

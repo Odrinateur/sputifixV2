@@ -40,16 +40,16 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
 
         if (playlist) {
             let artistsIdsDescription = playlist.description;
-            console.log(artistsIdsDescription);
             if (artistsIdsDescription && artistsIdsDescription.startsWith('ids: ')) {
                 artistsIdsDescription = artistsIdsDescription.replace('ids: ', '');
                 const descriptionArtistIds = artistsIdsDescription.split(',');
                 if (descriptionArtistIds) {
                     artistIds = [...new Set([...artistIds, ...descriptionArtistIds])];
-                    console.log(artistIds);
                 }
             }
         }
+
+        console.log(artistIds, playlist, playlist?.name);
 
         if (artistIds.length === 0) return;
 
@@ -68,6 +68,8 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
             }
 
             artistTracks.push(...tracks);
+
+            await new Promise((resolve) => setTimeout(resolve, 10000));
         }
 
         const playlistTracks = playlist ? await getPlaylistTracks(playlist) : undefined;
@@ -76,10 +78,11 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
 
         if (playlist) {
             if (uniqueTracks.length !== 0) {
-                await sdk.playlists.addItemsToPlaylist(
-                    playlist.id,
-                    uniqueTracks.map((track) => track.uri)
-                );
+                const trackUris = uniqueTracks.map((track) => track.uri);
+                for (let i = 0; i < trackUris.length; i += 50) {
+                    const batch = trackUris.slice(i, i + 50);
+                    await sdk.playlists.addItemsToPlaylist(playlist.id, batch);
+                }
             }
             await sdk.playlists.changePlaylistDetails(playlist.id, {
                 description: `ids: ${artistIds.join(',')}`,
@@ -90,10 +93,11 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
                 description: `ids: ${artists.map((artist) => artist.id).join(',')}`,
             });
 
-            await sdk.playlists.addItemsToPlaylist(
-                newPlaylist.id,
-                uniqueTracks.map((track) => track.uri)
-            );
+            const trackUris = uniqueTracks.map((track) => track.uri);
+            for (let i = 0; i < trackUris.length; i += 50) {
+                const batch = trackUris.slice(i, i + 50);
+                await sdk.playlists.addItemsToPlaylist(newPlaylist.id, batch);
+            }
         }
     };
 
