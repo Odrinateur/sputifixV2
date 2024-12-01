@@ -1,6 +1,6 @@
 import { IncludeGroupsType } from '@/types/common';
 import { Artist, SimplifiedPlaylist, SimplifiedTrack, SpotifyApi } from '@spotify/web-api-ts-sdk';
-import { createContext, ReactNode, useContext } from 'react';
+import { createContext, ReactNode, useContext, useRef } from 'react';
 
 type MakerContextType = {
     searchArtistByName: (q: string) => Promise<Artist[]>;
@@ -10,7 +10,18 @@ type MakerContextType = {
 const MakerContext = createContext<MakerContextType | undefined>(undefined);
 
 export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: ReactNode }) => {
+    const requestCounter = useRef(0);
+
+    const handleRequestCount = async () => {
+        requestCounter.current++;
+        if (requestCounter.current >= 100) {
+            await new Promise((resolve) => setTimeout(resolve, 20000));
+            requestCounter.current = 0;
+        }
+    };
+
     const searchArtistByName = async (q: string): Promise<Artist[]> => {
+        await handleRequestCount();
         const results = await sdk.search(q, ['artist']);
         return results.artists.items;
     };
@@ -31,6 +42,7 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
         for (const playlist of playlists) {
             await processOnePlaylist(playlist, artists, artistTracksCache);
             await new Promise((resolve) => setTimeout(resolve, 30000));
+            requestCounter.current = 0;
         }
     };
 
@@ -72,7 +84,8 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
 
             artistTracks.push(...tracks);
 
-            await new Promise((resolve) => setTimeout(resolve, 10000));
+            await new Promise((resolve) => setTimeout(resolve, 20000));
+            requestCounter.current = 0;
         }
 
         const playlistTracks = playlist ? await getPlaylistTracks(playlist) : undefined;
@@ -106,23 +119,27 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
     };
 
     const getArtistUniqueTracks = async (artist_id: string, includeGroups: IncludeGroupsType) => {
+        await handleRequestCount();
         const albums = [];
         let response = await sdk.artists.albums(artist_id, includeGroups, undefined, 50, 0);
         albums.push(...response.items);
 
         while (response.next) {
-            response = await sdk.makeRequest('GET', response.next.replace('https://api.spotify.com/v1', ''));
+            await handleRequestCount();
+            response = await sdk.makeRequest('GET', response.next.replace('https://api.spotify.com/v1/', ''));
             albums.push(...response.items);
         }
 
         const tracks = [];
         for (const album of albums) {
+            await handleRequestCount();
             let response = await sdk.albums.tracks(album.id, undefined, 50, 0);
             if (includeGroups !== 'appears_on') tracks.push(...response.items);
             else tracks.push(...response.items.filter((track) => track.artists.some((a) => a.id === artist_id)));
 
             while (response.next) {
-                response = await sdk.makeRequest('GET', response.next.replace('https://api.spotify.com/v1', ''));
+                await handleRequestCount();
+                response = await sdk.makeRequest('GET', response.next.replace('https://api.spotify.com/v1/', ''));
                 if (includeGroups !== 'appears_on') tracks.push(...response.items);
                 else tracks.push(...response.items.filter((track) => track.artists.some((a) => a.id === artist_id)));
             }
@@ -164,11 +181,13 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
     };
 
     const getPlaylistTracks = async (playlist: SimplifiedPlaylist) => {
+        await handleRequestCount();
         const tracks = [];
         let response = await sdk.playlists.getPlaylistItems(playlist.id, undefined, undefined, 50, 0);
         tracks.push(...response.items);
 
         while (response.next) {
+            await handleRequestCount();
             response = await sdk.makeRequest('GET', response.next.replace('https://api.spotify.com/v1/', ''));
             tracks.push(...response.items);
         }
