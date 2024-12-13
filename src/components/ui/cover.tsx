@@ -12,6 +12,7 @@ interface CoverProps {
 
 export const Cover: React.FC<CoverProps> = ({ images, coverType, className }) => {
     if (!images || images.length === 0) {
+        className = `${className} h-fit`;
         switch (coverType) {
             case 'album':
                 return AlbumCover(className);

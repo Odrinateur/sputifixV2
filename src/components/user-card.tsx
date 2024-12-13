@@ -20,14 +20,16 @@ export function UserCard() {
     }, [getUser, user]);
 
     return (
-        <Card className={'w-full h-2/5'}>
-            <CardContent className={'w-full h-full p-4 flex flex-col sm:flex-row justify-start gap-4'}>
-                {user ? (
-                    <Cover images={user.images} coverType={'user'} className={'rounded-xl'} />
-                ) : (
-                    <Skeleton className={'w-2/5 h-full'} />
-                )}
-                <div className={'w-3/5 aspect-square p-2 flex flex-col items-start gap-4'}>
+        <Card className={'w-full'}>
+            <CardContent className={'p-4 flex flex-col sm:flex-row gap-4'}>
+                <div className={'w-48 h-48 sm:w-64 sm:h-64 shrink-0'}>
+                    {user ? (
+                        <Cover images={user.images} coverType={'user'} className={'w-full h-full'} />
+                    ) : (
+                        <Skeleton className={'w-full h-full'} />
+                    )}
+                </div>
+                <div className={'flex-1 p-2 flex flex-col items-start gap-4'}>
                     {user ? (
                         <>
                             <H1 className={'flex justify-center items-center gap-4'}>
@@ -40,7 +42,7 @@ export function UserCard() {
                                     <Link2 className={'!w-12 !h-12'} />
                                 </Link>
                             </H1>
-                            <H4 className={'mt-auto'}>id : {user.id}</H4>
+                            <H4>id : {user.id}</H4>
                             <H4>email : {user.email}</H4>
                             <H4>{user.followers.total} followers</H4>
                         </>
