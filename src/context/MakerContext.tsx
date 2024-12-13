@@ -109,9 +109,11 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
                 const trackUris = uniqueTracks.map((track) => track.uri);
                 for (let i = 0; i < trackUris.length; i += 50) {
                     const batch = trackUris.slice(i, i + 50);
+                    await handleRequestCount();
                     await sdk.playlists.addItemsToPlaylist(playlist.id, batch);
                 }
             }
+            await handleRequestCount();
             await sdk.playlists.changePlaylistDetails(playlist.id, {
                 description: `ids: ${artistIds.join(',')}`,
             });
@@ -121,6 +123,7 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
                 tracks: uniqueTracks,
             };
         } else {
+            await handleRequestCount();
             const newPlaylist = await sdk.playlists.createPlaylist((await sdk.currentUser.profile()).id, {
                 name: artists.map((artist) => artist.name).join(' / '),
                 description: `ids: ${artists.map((artist) => artist.id).join(',')}`,
@@ -130,6 +133,7 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
             const trackUris = uniqueTracks.map((track) => track.uri);
             for (let i = 0; i < trackUris.length; i += 50) {
                 const batch = trackUris.slice(i, i + 50);
+                await handleRequestCount();
                 await sdk.playlists.addItemsToPlaylist(newPlaylist.id, batch);
             }
 
@@ -143,6 +147,7 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
     const getArtistUniqueTracks = async (artist_id: string, includeGroups: IncludeGroupsType): Promise<Track[]> => {
         await handleRequestCount();
         const albums = [];
+        await handleRequestCount();
         let response = await sdk.artists.albums(artist_id, includeGroups, undefined, 50, 0);
         albums.push(...response.items);
 
@@ -205,7 +210,7 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
             for (let i = 0; i < uniqueTracks.length; i++) {
                 if (
                     track.name.toLowerCase() === uniqueTracks[i].name.toLowerCase() &&
-                    Math.abs(track.duration_ms - uniqueTracks[i].duration_ms) <= 100
+                    Math.abs(track.duration_ms - uniqueTracks[i].duration_ms) <= 2000
                 ) {
                     if (track.explicit) {
                         uniqueTracks.splice(i, 1);
@@ -220,7 +225,7 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
                 isAlreadyInPlaylist = playlistTracks.some(
                     (playlistTrack) =>
                         playlistTrack.name.toLowerCase() === track.name.toLowerCase() &&
-                        Math.abs(playlistTrack.duration_ms - track.duration_ms) <= 100
+                        Math.abs(playlistTrack.duration_ms - track.duration_ms) <= 2000
                 );
             }
 
@@ -229,12 +234,14 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
             }
         }
 
+        console.log(uniqueTracks);
         return uniqueTracks;
     };
 
     const getPlaylistTracks = async (playlist: SimplifiedPlaylist): Promise<Track[]> => {
         await handleRequestCount();
         const tracks: Track[] = [];
+        await handleRequestCount();
         let response = await sdk.playlists.getPlaylistItems(playlist.id, undefined, undefined, 50, 0);
         tracks.push(...response.items.map((item) => item.track));
 
