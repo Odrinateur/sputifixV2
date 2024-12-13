@@ -264,22 +264,26 @@ function Step3({
                     <H3 className={'text-center'}>All playlists have been processed successfully !</H3>
                     <H4 className={'text-center'}> Here are the results :</H4>
                     <section className="w-full flex flex-col items-center">
-                        {proscessedPlaylists?.map((proscessedPlaylist) => (
-                            <div
-                                key={proscessedPlaylist.playlist.id}
-                                className={'w-full flex flex-col gap-4 px-10 py-8'}
-                            >
-                                <H3 className={'w-full flex justify-start gap-4'}>
-                                    <Cover
-                                        images={proscessedPlaylist.playlist.images}
-                                        coverType={'playlist'}
-                                        className={'!w-8 !h-8'}
-                                    />
-                                    {proscessedPlaylist.playlist.name}
-                                </H3>
-                                <TracksTable tracks={proscessedPlaylist.tracks} />
-                            </div>
-                        ))}
+                        {proscessedPlaylists ? (
+                            proscessedPlaylists?.map((proscessedPlaylist) => (
+                                <div
+                                    key={proscessedPlaylist.playlist.id}
+                                    className={'w-full flex flex-col gap-4 px-10 py-8'}
+                                >
+                                    <H3 className={'w-full flex justify-start gap-4'}>
+                                        <Cover
+                                            images={proscessedPlaylist.playlist.images}
+                                            coverType={'playlist'}
+                                            className={'!w-8 !h-8'}
+                                        />
+                                        {proscessedPlaylist.playlist.name}
+                                    </H3>
+                                    <TracksTable tracks={proscessedPlaylist.tracks} />
+                                </div>
+                            ))
+                        ) : (
+                            <H3>No tracks added to the playlists</H3>
+                        )}
                     </section>
                 </>
             )}
