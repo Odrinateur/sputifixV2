@@ -4,16 +4,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ArtistsWithSelectGrid, PlaylistWithSelectGrid } from '@/components/ui/items-grid';
 import { MainContainerWithNav } from '@/components/ui/main-container';
 import { Separator } from '@/components/ui/separator';
-import { H1, H3 } from '@/components/ui/typography';
+import { H1, H3, H4 } from '@/components/ui/typography';
 import { useStorage } from '@/context/StorageContext';
 import { Artist, SimplifiedPlaylist } from '@spotify/web-api-ts-sdk';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useMaker } from '@/context/MakerContext';
-import { useNavigate } from 'react-router-dom';
 import { RefreshPlaylistsButton } from '@/components/refresh';
-import { LoadingStates } from '@/types/common';
+import { LoadingStates, ProcessedPlaylist } from '@/types/common';
+import { TracksTable } from '@/components/tracks-table/tracks-table';
+import { Cover } from '@/components/ui/cover';
 
 type Step = 1 | 2 | 3;
 
@@ -242,30 +243,46 @@ function Step3({
 }) {
     const { processPlaylists } = useMaker();
     const { refreshPlaylists } = useStorage();
+    const [proscessedPlaylists, setProcessedPlaylists] = useState<ProcessedPlaylist[] | null>(null);
     const [isCompleted, setIsCompleted] = useState(false);
-
-    const navigator = useNavigate();
 
     useEffect(() => {
         async function process() {
-            await processPlaylists(selectedPlaylists, selectedArtists);
+            setProcessedPlaylists(await processPlaylists(selectedPlaylists, selectedArtists));
             await refreshPlaylists(30);
             setIsCompleted(true);
         }
         process();
     }, [selectedPlaylists, selectedArtists, processPlaylists, refreshPlaylists]);
 
-    useEffect(() => {
-        if (isCompleted) {
-            setTimeout(() => {
-                navigator('/maker');
-            }, 2000);
-        }
-    }, [isCompleted, navigator]);
-
     return (
-        <div className="flex flex-col items-center gap-4">
-            {!isCompleted ? <H3>Processing playlists...</H3> : <H3>All playlists have been processed successfully!</H3>}
+        <div className="w-full flex flex-col items-center gap-4">
+            {!isCompleted ? (
+                <H3>Processing playlists...</H3>
+            ) : (
+                <>
+                    <H3 className={'text-center'}>All playlists have been processed successfully !</H3>
+                    <H4 className={'text-center'}> Here are the results :</H4>
+                    <section className="w-full flex flex-col items-center">
+                        {proscessedPlaylists?.map((proscessedPlaylist) => (
+                            <div
+                                key={proscessedPlaylist.playlist.id}
+                                className={'w-full flex flex-col gap-4 px-10 py-8'}
+                            >
+                                <H3 className={'w-full flex justify-start gap-4'}>
+                                    <Cover
+                                        images={proscessedPlaylist.playlist.images}
+                                        coverType={'playlist'}
+                                        className={'!w-8 !h-8'}
+                                    />
+                                    {proscessedPlaylist.playlist.name}
+                                </H3>
+                                <TracksTable tracks={proscessedPlaylist.tracks} />
+                            </div>
+                        ))}
+                    </section>
+                </>
+            )}
         </div>
     );
 }
