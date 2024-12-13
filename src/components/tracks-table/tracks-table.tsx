@@ -136,7 +136,7 @@ export function TracksTable({
     id,
 }: {
     tracks: Track[] | null;
-    RefreshButton: React.ComponentType<{ id?: string; setLoadingState: (state: LoadingStates) => void }>;
+    RefreshButton?: React.ComponentType<{ id?: string; setLoadingState: (state: LoadingStates) => void }> | null;
     id?: string;
 }) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -176,15 +176,17 @@ export function TracksTable({
 
     return (
         <div className="w-full space-y-4">
-            <div className={'flex items-center gap-4'}>
-                <Input
-                    placeholder="Search tracks, artists or albums..."
-                    value={globalFilter}
-                    onChange={(e) => setGlobalFilter(e.target.value)}
-                    className="w-full"
-                />
-                <RefreshButton id={id} setLoadingState={setLoadingState} />
-            </div>
+            {RefreshButton ? (
+                <div className={'flex items-center gap-4'}>
+                    <Input
+                        placeholder="Search tracks, artists or albums..."
+                        value={globalFilter}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                        className="w-full"
+                    />
+                    <RefreshButton id={id} setLoadingState={setLoadingState} />
+                </div>
+            ) : null}
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
