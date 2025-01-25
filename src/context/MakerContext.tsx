@@ -14,7 +14,7 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
 
     const handleRequestCount = async () => {
         requestCounter.current++;
-        if (requestCounter.current >= 100) {
+        if (requestCounter.current >= 70) {
             await new Promise((resolve) => setTimeout(resolve, 20000));
             requestCounter.current = 0;
         }
