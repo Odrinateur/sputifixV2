@@ -10,16 +10,19 @@ function Container({
     children,
     className = '',
     isRelative = false,
+    onClick,
 }: {
     children: ReactNode;
     className?: string;
     isRelative?: boolean;
+    onClick?: () => void;
 }) {
     return (
         <div
             className={`h-full flex flex-col justify-start items-center text-card-foreground rounded-lg text-center ${
                 isRelative ? 'relative' : ''
             } ${className}`}
+            onClick={onClick}
         >
             {children}
         </div>
@@ -50,8 +53,16 @@ function ArtistWithSelectCard({
     removeArtist: (artist: Artist) => void;
     isSelected: boolean;
 }) {
+    const handleToggle = (checked: boolean) => {
+        if (checked) {
+            addArtist(artist);
+        } else {
+            removeArtist(artist);
+        }
+    };
+
     return (
-        <Container>
+        <Container onClick={() => handleToggle(!isSelected)} className={'cursor-pointer'}>
             <Cover
                 images={artist.images}
                 coverType={'artist'}
@@ -59,17 +70,7 @@ function ArtistWithSelectCard({
             />
             <div className={'w-full flex justify-center items-center'}>
                 <H3 className={'w-4/5 truncate'}>{artist.name}</H3>
-                <Checkbox
-                    className={'size-6 border-2'}
-                    checked={isSelected}
-                    onCheckedChange={(checked: boolean) => {
-                        if (checked) {
-                            addArtist(artist);
-                        } else {
-                            removeArtist(artist);
-                        }
-                    }}
-                />
+                <Checkbox className={'size-6 border-2'} checked={isSelected} onCheckedChange={handleToggle} />
             </div>
         </Container>
     );
@@ -98,22 +99,22 @@ function PlaylistWithSelectCard({
     removePlaylist: (playlist: SimplifiedPlaylist) => void;
     isSelected: boolean;
 }) {
+    const handleToggle = (checked: boolean) => {
+        if (checked) {
+            addPlaylist(playlist);
+        } else {
+            removePlaylist(playlist);
+        }
+    };
+
     return (
         <Container>
-            <Cover images={playlist.images} coverType={'playlist'} className={'w-full aspect-square rounded-lg'} />
+            <div className="cursor-pointer" onClick={() => handleToggle(!isSelected)}>
+                <Cover images={playlist.images} coverType={'playlist'} className={'w-full aspect-square rounded-lg'} />
+            </div>
             <div className={'w-full flex justify-center items-center'}>
                 <H3 className={'w-4/5 truncate'}>{playlist.name}</H3>
-                <Checkbox
-                    className={'size-6 border-2'}
-                    checked={isSelected}
-                    onCheckedChange={(checked: boolean) => {
-                        if (checked) {
-                            addPlaylist(playlist);
-                        } else {
-                            removePlaylist(playlist);
-                        }
-                    }}
-                />
+                <Checkbox className={'size-6 border-2'} checked={isSelected} onCheckedChange={handleToggle} />
             </div>
         </Container>
     );
