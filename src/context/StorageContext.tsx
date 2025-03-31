@@ -1,8 +1,8 @@
 import { createContext, ReactNode, useContext } from 'react';
 import localForage from 'localforage';
 import CryptoJS from 'crypto-js';
-import { Artist, SavedTrack, SimplifiedPlaylist, SpotifyApi, Track, UserProfile } from '@spotify/web-api-ts-sdk';
-import { LimitType, StatsFM, ThemeType, TimeRangeType, TopItemsType } from '@/types/common.ts';
+import { Artist, SavedTrack, SpotifyApi, Track, UserProfile } from '@spotify/web-api-ts-sdk';
+import { LimitType, StatsFM, StoredPlaylist, ThemeType, TimeRangeType, TopItemsType } from '@/types/common.ts';
 import { getUserStats } from '@/services/StatsFMService';
 
 const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY as string;
@@ -28,10 +28,10 @@ type StorageContextType = {
         timeRange?: TimeRangeType
     ): Promise<T[] | null>;
     getUserLikes(): Promise<SavedTrack[] | null>;
-    getUserPlaylists(owned?: boolean): Promise<SimplifiedPlaylist[] | null>;
-    getPlaylist(id: string): Promise<[SimplifiedPlaylist | null, Track[] | null]>;
+    getUserPlaylists(owned?: boolean): Promise<StoredPlaylist[] | null>;
+    getPlaylist(id: string): Promise<[StoredPlaylist | null, Track[] | null]>;
     setPinnedUserPlaylist(addOrRemove: 'add' | 'remove', id: string): void;
-    getPinnedUserPlaylists(): Promise<SimplifiedPlaylist[] | null>;
+    getPinnedUserPlaylists(): Promise<StoredPlaylist[] | null>;
 
     getStatsFM(): Promise<[StatsFM | null, StatsFM | null]>;
 
@@ -41,6 +41,7 @@ type StorageContextType = {
     refreshPlaylist(id: string): void;
     subscribeToPinnedPlaylistsUpdate: (callback: () => void) => void;
     unsubscribeFromPinnedPlaylistsUpdate: (callback: () => void) => void;
+    saveUpdatedPlaylistLastUpdated: (playlist: StoredPlaylist) => Promise<void>;
 };
 
 const StorageContext = createContext<StorageContextType | undefined>(undefined);
@@ -176,14 +177,22 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         return likes ?? null;
     };
 
-    const getUserPlaylists = async (owned = false): Promise<SimplifiedPlaylist[] | null> => {
+    const getUserPlaylists = async (owned = false): Promise<StoredPlaylist[] | null> => {
         const playlistsInStorage = await getItem('playlists');
         if (playlistsInStorage && playlistsInStorage.lastUpdated + 3600 * 1000 > Date.now()) {
             const playlistsJson = JSON.parse(playlistsInStorage.value);
             const user = await getUser();
             return owned
-                ? playlistsJson.filter((playlist: SimplifiedPlaylist) => playlist?.owner.id === user?.id)
+                ? playlistsJson.filter((playlist: StoredPlaylist) => playlist?.owner.id === user?.id)
                 : playlistsJson;
+        }
+
+        const existingPlaylistsMap = new Map<string, StoredPlaylist>();
+        if (playlistsInStorage) {
+            const existingPlaylists: StoredPlaylist[] = JSON.parse(playlistsInStorage.value);
+            existingPlaylists.forEach((playlist) => {
+                existingPlaylistsMap.set(playlist.id, playlist);
+            });
         }
 
         const playlists = [];
@@ -195,8 +204,17 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
             playlists.push(...response.items);
         }
         const filteredPlaylists = playlists.filter((playlist) => playlist !== null);
-        await setItem('playlists', JSON.stringify(filteredPlaylists));
-        return filteredPlaylists;
+
+        const storedPlaylists: StoredPlaylist[] = filteredPlaylists.map((playlist) => {
+            const existingPlaylist = existingPlaylistsMap.get(playlist.id);
+            return {
+                ...playlist,
+                lastUpdated: existingPlaylist?.lastUpdated || 0,
+            };
+        });
+
+        await setItem('playlists', JSON.stringify(storedPlaylists));
+        return storedPlaylists;
     };
 
     const getPlaylistTracks = async (id: string): Promise<Track[] | null> => {
@@ -218,7 +236,7 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         return tracks;
     };
 
-    const getPlaylist = async (id: string): Promise<[SimplifiedPlaylist | null, Track[] | null]> => {
+    const getPlaylist = async (id: string): Promise<[StoredPlaylist | null, Track[] | null]> => {
         const userPlaylists = await getUserPlaylists();
         const playlist = userPlaylists?.find((p) => p.id === id);
         if (!playlist) return [null, null];
@@ -255,7 +273,7 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         notifyPinnedPlaylistsSubscribers();
     };
 
-    const getPinnedUserPlaylists = async (): Promise<SimplifiedPlaylist[]> => {
+    const getPinnedUserPlaylists = async (): Promise<StoredPlaylist[]> => {
         const pinnedPlaylists = await getItem('pinned_playlists');
         if (pinnedPlaylists) {
             const pinnedIds = JSON.parse(pinnedPlaylists);
@@ -317,6 +335,18 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         await getPlaylist(id);
     };
 
+    const saveUpdatedPlaylistLastUpdated = async (playlist: StoredPlaylist) => {
+        const playlistsInStorage = await getItem('playlists');
+        if (playlistsInStorage) {
+            const playlists = JSON.parse(playlistsInStorage.value);
+            const index = playlists.findIndex((p: StoredPlaylist) => p.id === playlist.id);
+            if (index !== -1) {
+                playlists[index].lastUpdated = playlist.lastUpdated;
+                await setItem('playlists', JSON.stringify(playlists));
+            }
+        }
+    };
+
     const storage = {
         getSettings,
         setSettings,
@@ -338,16 +368,17 @@ export const StorageProvider = ({ sdk, children }: { sdk: SpotifyApi; children: 
         refreshPlaylist,
         subscribeToPinnedPlaylistsUpdate,
         unsubscribeFromPinnedPlaylistsUpdate,
+        saveUpdatedPlaylistLastUpdated,
     };
 
     return <StorageContext.Provider value={storage}>{children}</StorageContext.Provider>;
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useStorage = () => {
+export function useStorage() {
     const context = useContext(StorageContext);
     if (!context) {
         throw new Error('useStorage must be used within a StorageProvider');
     }
     return context;
-};
+}

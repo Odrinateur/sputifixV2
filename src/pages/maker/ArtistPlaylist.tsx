@@ -6,13 +6,13 @@ import { MainContainerWithNav } from '@/components/ui/main-container';
 import { Separator } from '@/components/ui/separator';
 import { H1, H3, H4 } from '@/components/ui/typography';
 import { useStorage } from '@/context/StorageContext';
-import { Artist, SimplifiedPlaylist } from '@spotify/web-api-ts-sdk';
+import { Artist } from '@spotify/web-api-ts-sdk';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { useMaker } from '@/context/MakerContext';
 import { RefreshPlaylistsButton } from '@/components/refresh';
-import { LoadingStates, ProcessedPlaylist } from '@/types/common';
+import { LoadingStates, ProcessedPlaylist, StoredPlaylist } from '@/types/common';
 import { TracksTable } from '@/components/tracks-table/tracks-table';
 import { Cover } from '@/components/ui/cover';
 
@@ -20,7 +20,7 @@ type Step = 1 | 2 | 3;
 
 export function ArtistPlaylist() {
     const [step, setStep] = useState<Step>(1);
-    const [selectedPlaylists, setSelectedPlaylists] = useState<SimplifiedPlaylist[]>([]);
+    const [selectedPlaylists, setSelectedPlaylists] = useState<StoredPlaylist[]>([]);
     const [selectedArtists, setSelectedArtists] = useState<Artist[]>([]);
 
     return (
@@ -71,15 +71,15 @@ function Step1({
     setSelectedPlaylists,
     setStep,
 }: {
-    selectedPlaylists: SimplifiedPlaylist[];
-    setSelectedPlaylists: (playlists: SimplifiedPlaylist[]) => void;
+    selectedPlaylists: StoredPlaylist[];
+    setSelectedPlaylists: (playlists: StoredPlaylist[]) => void;
     setStep: (step: Step) => void;
 }) {
     const { getUserPlaylists } = useStorage();
-    const [playlists, setPlaylists] = useState<SimplifiedPlaylist[] | null>(null);
+    const [playlists, setPlaylists] = useState<StoredPlaylist[] | null>(null);
     const [isNewPlaylist, setIsNewPlaylist] = useState<boolean>(true);
     const [globalFilter, setGlobalFilter] = useState<string>('');
-    const [filteredPlaylists, setFilteredPlaylists] = useState<SimplifiedPlaylist[] | null>(null);
+    const [filteredPlaylists, setFilteredPlaylists] = useState<StoredPlaylist[] | null>(null);
     const [loadingState, setLoadingState] = useState<LoadingStates>('idle');
 
     useEffect(() => {
@@ -110,11 +110,11 @@ function Step1({
         setFilteredPlaylists(filtered);
     }, [globalFilter, playlists]);
 
-    const addPlaylist = (playlist: SimplifiedPlaylist) => {
+    const addPlaylist = (playlist: StoredPlaylist) => {
         setSelectedPlaylists([...selectedPlaylists, playlist]);
     };
 
-    const removePlaylist = (playlist: SimplifiedPlaylist) => {
+    const removePlaylist = (playlist: StoredPlaylist) => {
         setSelectedPlaylists(selectedPlaylists.filter((p) => p.id !== playlist.id));
     };
 
@@ -238,12 +238,12 @@ function Step3({
     selectedPlaylists,
     selectedArtists,
 }: {
-    selectedPlaylists: SimplifiedPlaylist[];
+    selectedPlaylists: StoredPlaylist[];
     selectedArtists: Artist[];
 }) {
     const { processPlaylists } = useMaker();
     const { refreshPlaylists } = useStorage();
-    const [proscessedPlaylists, setProcessedPlaylists] = useState<ProcessedPlaylist[] | null>(null);
+    const [processedPlaylists, setProcessedPlaylists] = useState<ProcessedPlaylist[] | null>(null);
     const [isCompleted, setIsCompleted] = useState(false);
 
     useEffect(() => {
@@ -264,23 +264,30 @@ function Step3({
                     <H3 className={'text-center'}>All playlists have been processed successfully !</H3>
                     <H4 className={'text-center'}> Here are the results :</H4>
                     <section className="w-full flex flex-col items-center">
-                        {proscessedPlaylists ? (
-                            proscessedPlaylists?.map((proscessedPlaylist) => (
-                                <div
-                                    key={proscessedPlaylist.playlist.id}
-                                    className={'w-full flex flex-col gap-4 px-10 py-8'}
-                                >
-                                    <H3 className={'w-full flex justify-start gap-4'}>
-                                        <Cover
-                                            images={proscessedPlaylist.playlist.images}
-                                            coverType={'playlist'}
-                                            className={'!w-8 !h-8'}
-                                        />
-                                        {proscessedPlaylist.playlist.name}
-                                    </H3>
-                                    <TracksTable tracks={proscessedPlaylist.tracks} />
-                                </div>
-                            ))
+                        {processedPlaylists ? (
+                            processedPlaylists.filter((processedPlaylist) => processedPlaylist.tracks.length > 0)
+                                .length > 0 ? (
+                                processedPlaylists
+                                    .filter((processedPlaylist) => processedPlaylist.tracks.length > 0)
+                                    .map((processedPlaylist) => (
+                                        <div
+                                            key={processedPlaylist.playlist.id}
+                                            className={'w-full flex flex-col gap-4 px-10 py-8'}
+                                        >
+                                            <H3 className={'w-full flex justify-start gap-4'}>
+                                                <Cover
+                                                    images={processedPlaylist.playlist.images}
+                                                    coverType={'playlist'}
+                                                    className={'!w-8 !h-8'}
+                                                />
+                                                {processedPlaylist.playlist.name}
+                                            </H3>
+                                            <TracksTable tracks={processedPlaylist.tracks} />
+                                        </div>
+                                    ))
+                            ) : (
+                                <H3>No tracks added to the playlists</H3>
+                            )
                         ) : (
                             <H3>No tracks added to the playlists</H3>
                         )}

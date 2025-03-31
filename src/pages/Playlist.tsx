@@ -4,13 +4,14 @@ import { MainContainerWithNav } from '@/components/ui/main-container';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useStorage } from '@/context/StorageContext';
 import { useEffect, useState } from 'react';
-import { SimplifiedPlaylist, Track } from '@spotify/web-api-ts-sdk';
+import { Track } from '@spotify/web-api-ts-sdk';
+import { StoredPlaylist } from '@/types/common';
 
 export function PlaylistPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const { getPlaylist } = useStorage();
-    const [playlist, setPlaylist] = useState<SimplifiedPlaylist | null>(null);
+    const [playlist, setPlaylist] = useState<StoredPlaylist | null>(null);
     const [tracks, setTracks] = useState<Track[] | null>(null);
 
     useEffect(() => {

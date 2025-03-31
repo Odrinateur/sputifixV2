@@ -1,4 +1,4 @@
-import type { Artist, SimplifiedPlaylist, Track } from '@spotify/web-api-ts-sdk';
+import type { Artist, Track } from '@spotify/web-api-ts-sdk';
 import { CardContent } from '@/components/ui/card.tsx';
 import {
     ArtistCard,
@@ -10,6 +10,7 @@ import {
     TrackCard,
     TrackSkeleton,
 } from '@/components/ui/item-card.tsx';
+import { StoredPlaylist } from '@/types/common';
 
 interface ItemsGridProps<T> {
     items: T[] | null;
@@ -60,7 +61,7 @@ export const ArtistsWithSelectGrid = ({
     />
 );
 
-export const PlaylistsGrid = ({ items }: { items: SimplifiedPlaylist[] | null }) => (
+export const PlaylistsGrid = ({ items }: { items: StoredPlaylist[] | null }) => (
     <ItemsGrid
         items={items}
         ItemComponent={({ item }) => <PlaylistCard playlist={item} />}
@@ -74,10 +75,10 @@ export const PlaylistWithSelectGrid = ({
     removePlaylist,
     selectedPlaylists,
 }: {
-    items: SimplifiedPlaylist[] | null;
-    addPlaylist: (playlist: SimplifiedPlaylist) => void;
-    removePlaylist: (playlist: SimplifiedPlaylist) => void;
-    selectedPlaylists: SimplifiedPlaylist[] | null;
+    items: StoredPlaylist[] | null;
+    addPlaylist: (playlist: StoredPlaylist) => void;
+    removePlaylist: (playlist: StoredPlaylist) => void;
+    selectedPlaylists: StoredPlaylist[] | null;
 }) => (
     <ItemsGrid
         items={items}

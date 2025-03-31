@@ -1,15 +1,17 @@
-import { IncludeGroupsType, ProcessedPlaylist } from '@/types/common';
-import { Artist, SimplifiedPlaylist, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
+import { IncludeGroupsType, ProcessedPlaylist, StoredPlaylist } from '@/types/common';
+import { Artist, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
 import { createContext, ReactNode, useContext, useRef } from 'react';
+import { useStorage } from './StorageContext';
 
 type MakerContextType = {
     searchArtistByName: (q: string) => Promise<Artist[]>;
-    processPlaylists: (playlists: SimplifiedPlaylist[], artists: Artist[]) => Promise<ProcessedPlaylist[]>;
+    processPlaylists: (playlists: StoredPlaylist[], artists: Artist[]) => Promise<ProcessedPlaylist[]>;
 };
 
 const MakerContext = createContext<MakerContextType | undefined>(undefined);
 
 export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: ReactNode }) => {
+    const storage = useStorage();
     const requestCounter = useRef(0);
 
     const handleRequestCount = async () => {
@@ -26,10 +28,33 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
         return results.artists.items;
     };
 
-    const processPlaylists = async (
-        playlists: SimplifiedPlaylist[],
-        artists: Artist[]
-    ): Promise<ProcessedPlaylist[]> => {
+    const removeArtistNotUpdatedSinceLastPlaylistUpdate = async (
+        artistIds: string[],
+        playlist: StoredPlaylist
+    ): Promise<string[]> => {
+        const lastUpdatedValue = playlist.lastUpdated;
+        const updatedArtistIds: string[] = [];
+
+        for (const artistId of artistIds) {
+            await handleRequestCount();
+            const response = await sdk.artists.albums(artistId, 'album,single,appears_on', undefined, 3, 0);
+            const albums = response.items;
+            const lastUpdated = albums.reduce((latest, album) => {
+                if (album.release_date && new Date(album.release_date).getTime() > latest) {
+                    return new Date(album.release_date).getTime();
+                }
+                return latest;
+            }, 0);
+
+            if (lastUpdated > lastUpdatedValue) {
+                updatedArtistIds.push(artistId);
+            }
+        }
+
+        return updatedArtistIds;
+    };
+
+    const processPlaylists = async (playlists: StoredPlaylist[], artists: Artist[]): Promise<ProcessedPlaylist[]> => {
         if (artists.length === 0 && playlists.length === 0) return [];
 
         const artistTracksCache = new Map<string, Track[]>();
@@ -38,33 +63,34 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
         if (artists.length === 0) {
             for (const playlist of playlists) {
                 const processedPlaylist = await processOnePlaylist(playlist, [], artistTracksCache);
-                if (processedPlaylist && processedPlaylist.tracks.length !== 0) {
+                if (processedPlaylist) {
                     resultAddedArtistsByPlaylist.push(processedPlaylist);
+                    await storage.saveUpdatedPlaylistLastUpdated(processedPlaylist.playlist);
                 }
             }
             return resultAddedArtistsByPlaylist;
         } else if (playlists.length === 0) {
             const processedPlaylist = await processOnePlaylist(null, artists, artistTracksCache);
-            if (processedPlaylist && processedPlaylist.tracks.length !== 0) {
+            if (processedPlaylist) {
                 resultAddedArtistsByPlaylist.push(processedPlaylist);
+                await storage.saveUpdatedPlaylistLastUpdated(processedPlaylist.playlist);
             }
             return resultAddedArtistsByPlaylist;
         }
 
         for (const playlist of playlists) {
             const processedPlaylist = await processOnePlaylist(playlist, artists, artistTracksCache);
-            if (processedPlaylist && processedPlaylist.tracks.length !== 0) {
+            if (processedPlaylist) {
                 resultAddedArtistsByPlaylist.push(processedPlaylist);
+                await storage.saveUpdatedPlaylistLastUpdated(processedPlaylist.playlist);
             }
-            await new Promise((resolve) => setTimeout(resolve, 30000));
-            requestCounter.current = 0;
         }
 
         return resultAddedArtistsByPlaylist;
     };
 
     const processOnePlaylist = async (
-        playlist: SimplifiedPlaylist | null,
+        playlist: StoredPlaylist | null,
         artists: Artist[],
         artistTracksCache: Map<string, Track[]>
     ): Promise<ProcessedPlaylist | undefined> => {
@@ -81,7 +107,20 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
             }
         }
 
-        if (artistIds.length === 0) return;
+        if (playlist) {
+            artistIds = await removeArtistNotUpdatedSinceLastPlaylistUpdate(artistIds, playlist);
+        }
+
+        if (artistIds.length === 0) {
+            if (playlist) {
+                playlist.lastUpdated = Date.now();
+                return {
+                    playlist,
+                    tracks: [],
+                };
+            }
+            return;
+        }
 
         const artistTracks = [];
         for (const artistId of artistIds) {
@@ -118,6 +157,8 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
                 description: `ids: ${artistIds.join(',')}`,
             });
 
+            playlist.lastUpdated = Date.now();
+
             return {
                 playlist,
                 tracks: uniqueTracks,
@@ -138,7 +179,10 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
             }
 
             return {
-                playlist: newPlaylist,
+                playlist: {
+                    ...newPlaylist,
+                    lastUpdated: Date.now(),
+                },
                 tracks: uniqueTracks,
             };
         }
@@ -238,7 +282,7 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
         return uniqueTracks;
     };
 
-    const getPlaylistTracks = async (playlist: SimplifiedPlaylist): Promise<Track[]> => {
+    const getPlaylistTracks = async (playlist: StoredPlaylist): Promise<Track[]> => {
         await handleRequestCount();
         const tracks: Track[] = [];
         await handleRequestCount();
@@ -263,10 +307,10 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useMaker = () => {
+export function useMaker() {
     const context = useContext(MakerContext);
     if (!context) {
         throw new Error('useMaker must be used within a MakerProvider');
     }
     return context;
-};
+}

@@ -1,6 +1,6 @@
 import { useStorage } from '@/context/StorageContext';
-import { LoadingStates } from '@/types/common';
-import { SimplifiedPlaylist, User } from '@spotify/web-api-ts-sdk';
+import { LoadingStates, StoredPlaylist } from '@/types/common';
+import { User } from '@spotify/web-api-ts-sdk';
 import { useEffect, useState } from 'react';
 import { PlaylistsGrid } from './ui/items-grid';
 import { Card, CardContent } from './ui/card';
@@ -10,11 +10,11 @@ import { Checkbox } from './ui/checkbox';
 
 export function Playlists() {
     const { getUser, getUserPlaylists } = useStorage();
-    const [playlists, setPlaylists] = useState<SimplifiedPlaylist[] | null>(null);
+    const [playlists, setPlaylists] = useState<StoredPlaylist[] | null>(null);
     const [user, setUser] = useState<User | null>(null);
     const [globalFilter, setGlobalFilter] = useState<string>('');
     const [loadingState, setLoadingState] = useState<LoadingStates>('idle');
-    const [originalPlaylists, setOriginalPlaylists] = useState<SimplifiedPlaylist[] | null>(null);
+    const [originalPlaylists, setOriginalPlaylists] = useState<StoredPlaylist[] | null>(null);
     const [showOnlyYours, setShowOnlyYours] = useState(false);
 
     useEffect(() => {

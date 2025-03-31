@@ -65,8 +65,12 @@ export const TopDisplayLimits: TopDisplayLimit[] = [50, 100, 150, 200, 250];
 
 export type IncludeGroupsType = 'album' | 'single' | 'appears_on' | 'compilation';
 
+export interface StoredPlaylist extends SimplifiedPlaylist {
+    lastUpdated: number;
+}
+
 export interface ProcessedPlaylist {
-    playlist: SimplifiedPlaylist;
+    playlist: StoredPlaylist;
     tracks: Track[];
 }
 

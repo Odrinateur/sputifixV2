@@ -1,4 +1,3 @@
-import { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk';
 import { Card, CardContent } from '@/components/ui/card.tsx';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { H1, H4 } from '@/components/ui/typography.tsx';
@@ -7,8 +6,9 @@ import { Link } from 'react-router-dom';
 import { Cover } from '@/components/ui/cover.tsx';
 import { useStorage } from '@/context/StorageContext';
 import { useEffect, useState } from 'react';
+import { StoredPlaylist } from '@/types/common';
 
-export function PlaylistCard({ playlist }: { playlist: SimplifiedPlaylist | null }) {
+export function PlaylistCard({ playlist }: { playlist: StoredPlaylist | null }) {
     const { getPinnedUserPlaylists, setPinnedUserPlaylist } = useStorage();
     const [isPinned, setIsPinned] = useState(false);
 

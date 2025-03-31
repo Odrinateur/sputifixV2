@@ -7,8 +7,7 @@ import { Separator } from './ui/separator';
 import { Switch } from './ui/switch';
 import { useStorage } from '@/context/StorageContext';
 import { useEffect, useState } from 'react';
-import { ThemeType } from '@/types/common';
-import { SimplifiedPlaylist } from '@spotify/web-api-ts-sdk';
+import { StoredPlaylist, ThemeType } from '@/types/common';
 import { Cover } from './ui/cover';
 import { Skeleton } from './ui/skeleton';
 
@@ -21,7 +20,7 @@ export function Navbar() {
         unsubscribeFromPinnedPlaylistsUpdate,
     } = useStorage();
     const [currentTheme, setCurrentTheme] = useState<ThemeType>('dark');
-    const [pinnedPlaylists, setPinnedPlaylists] = useState<SimplifiedPlaylist[] | null>(null);
+    const [pinnedPlaylists, setPinnedPlaylists] = useState<StoredPlaylist[] | null>(null);
 
     useEffect(() => {
         const updatePinnedPlaylists = async () => {

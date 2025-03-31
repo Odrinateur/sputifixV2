@@ -1,10 +1,11 @@
-import { Artist, SimplifiedPlaylist, Track } from '@spotify/web-api-ts-sdk';
+import { Artist, Track } from '@spotify/web-api-ts-sdk';
 import { ReactNode } from 'react';
 import { Cover } from '@/components/ui/cover.tsx';
 import { H3, H4 } from '@/components/ui/typography.tsx';
 import { Skeleton } from '@/components/ui/skeleton.tsx';
 import { Link } from 'react-router-dom';
 import { Checkbox } from './checkbox';
+import { StoredPlaylist } from '@/types/common';
 
 function Container({
     children,
@@ -76,7 +77,7 @@ function ArtistWithSelectCard({
     );
 }
 
-function PlaylistCard({ playlist }: { playlist: SimplifiedPlaylist }) {
+function PlaylistCard({ playlist }: { playlist: StoredPlaylist }) {
     return (
         <Link to={`/playlist/${playlist.id}`}>
             <Container>
@@ -94,9 +95,9 @@ function PlaylistWithSelectCard({
     removePlaylist,
     isSelected,
 }: {
-    playlist: SimplifiedPlaylist;
-    addPlaylist: (playlist: SimplifiedPlaylist) => void;
-    removePlaylist: (playlist: SimplifiedPlaylist) => void;
+    playlist: StoredPlaylist;
+    addPlaylist: (playlist: StoredPlaylist) => void;
+    removePlaylist: (playlist: StoredPlaylist) => void;
     isSelected: boolean;
 }) {
     const handleToggle = (checked: boolean) => {
