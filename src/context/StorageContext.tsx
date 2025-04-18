@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useContext } from 'react';
 import localForage from 'localforage';
-import CryptoJS from 'crypto-js';
+import * as CryptoJS from 'crypto-js';
 import { Artist, SavedTrack, SpotifyApi, Track, UserProfile } from '@spotify/web-api-ts-sdk';
 import { LimitType, StatsFM, StoredPlaylist, ThemeType, TimeRangeType, TopItemsType } from '@/types/common.ts';
 import { getUserStats } from '@/services/StatsFMService';
