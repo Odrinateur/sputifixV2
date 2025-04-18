@@ -4,5 +4,6 @@ dist
 .gitignore
 .env
 .env.*
+!.env.production
 *.md
 .vscode
