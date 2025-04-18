@@ -37,8 +37,13 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
 
         for (const artistId of artistIds) {
             await handleRequestCount();
-            const response = await sdk.artists.albums(artistId, 'album,single,appears_on', undefined, 3, 0);
-            const albums = response.items;
+            const albumResponse = await sdk.artists.albums(artistId, 'album', undefined, 10, 0);
+            await handleRequestCount();
+            const singleResponse = await sdk.artists.albums(artistId, 'single', undefined, 10, 0);
+            await handleRequestCount();
+            const appearsResponse = await sdk.artists.albums(artistId, 'appears_on', undefined, 10, 0);
+
+            const albums = [...albumResponse.items, ...singleResponse.items, ...appearsResponse.items];
             const lastUpdated = albums.reduce((latest, album) => {
                 if (album.release_date && new Date(album.release_date).getTime() > latest) {
                     return new Date(album.release_date).getTime();
@@ -189,7 +194,6 @@ export const MakerProvider = ({ sdk, children }: { sdk: SpotifyApi; children: Re
     };
 
     const getArtistUniqueTracks = async (artist_id: string, includeGroups: IncludeGroupsType): Promise<Track[]> => {
-        await handleRequestCount();
         const albums = [];
         await handleRequestCount();
         let response = await sdk.artists.albums(artist_id, includeGroups, undefined, 50, 0);
